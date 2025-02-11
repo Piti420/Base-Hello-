@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GM Greeter dApp</title>
+    <link rel="icon" href="data:,">
+    <style>
+        :root {
+            --primary: #6F3AFF;
+            --secondary: #2B6CB0;
+            --background: #F8FAFC;
+            --text: #1A202C;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin: 0 0 1.5rem 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #E2E8F0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        #greetingInfo {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #F8FAFF;
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        #greetingInfo p {
+            margin: 0.5rem 0;
+        }
+
+        .highlight {
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔵 GM Greeter</h1>
+        <input type="text" id="message" placeholder="Type your GM message...">
+        <button id="sendGM">🚀 Send GM</button>
+
+        <div id="greetingInfo">
+            <p><strong>Current Greeting:</strong> <span id="currentGreeting" class="highlight">GM, Base!</span></p>
+            <p><strong>Last Greeter:</strong> <span id="lastGreeter" class="highlight">0x...</span></p>
+            <p><strong>Total Greetings:</strong> <span id="greetingCount" class="highlight">0</span></p>
+        </div>
+    </div>
+
+    <!-- Ethers.js -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+    <script>
+        // Konfiguracja kontraktu
+        const contractAddress = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
+        const contractABI = [
+            {
+                "type": "constructor",
+                "inputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "getGreeting",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string",
+                        "internalType": "string"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "getGreetingCount",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "getLastGreeter",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "sayGM",
+                "inputs": [
+                    {
+                        "name": "_message",
+                        "type": "string",
+                        "internalType": "string"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "nonpayable"
+            }
+        ];
+
+        // Połączenie z Metamask
+        let provider, signer, contract;
+
+        async function init() {
+            if (window.ethereum) {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = provider.getSigner();
+                contract = new ethers.Contract(contractAddress, contractABI, signer);
+                await updateUI();
+            } else {
+                alert("Please install MetaMask!");
+            }
+        }
+
+        // Wysyłanie wiadomości
+        async function sendGM() {
+            const message = document.getElementById("message").value;
+            if (!message) return alert("Enter a message!");
+
+            try {
+                const tx = await contract.sayGM(message);
+                await tx.wait();
+                await updateUI();
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Transaction failed!");
+            }
+        }
+
+        // Aktualizacja UI
+        async function updateUI() {
+            const greeting = await contract.getGreeting();
+            const greeter = await contract.getLastGreeter();
+            const count = await contract.getGreetingCount();
+
+            document.getElementById("currentGreeting").textContent = greeting;
+            document.getElementById("lastGreeter").textContent = greeter;
+            document.getElementById("greetingCount").textContent = count.toString();
+        }
+
+        // Inicjalizacja
+        window.onload = () => {
+            init();
+            document.getElementById("sendGM").addEventListener("click", sendGM);
+        };
+    </script>
+</body>
+</html>
