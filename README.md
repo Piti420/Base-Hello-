@@ -3,7 +3,6 @@
 Decentralized application allowing users to send "GM" messages to a smart contract on Base blockchain.
 
 ## Demo
-https://twojanazwa.github.io/nazwa-repozytorium
 
 ## Features
 - Connect MetaMask wallet
