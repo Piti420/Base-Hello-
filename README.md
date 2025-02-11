@@ -2,7 +2,8 @@
 
 Decentralized application allowing users to send "GM" messages to a smart contract on Base blockchain.
 
-## Demo
+## Link
+https://piti420.github.io/Base-Hello-/
 
 ## Features
 - Connect MetaMask wallet
