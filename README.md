@@ -1,4 +1,4 @@
-# GM Greeter dApp
+# Hello Base
 
 Decentralized application allowing users to send "GM" messages to a smart contract on Base blockchain.
 
