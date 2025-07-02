@@ -1,208 +1,30 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hello Base</title>
-  <link rel="icon" href="hello.png" />
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #6F3AFF, #2B6CB0);
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
-
-    .container {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 2rem;
-      border-radius: 16px;
-      backdrop-filter: blur(10px);
-      width: 90%;
-      max-width: 480px;
-    }
-
-    .logo-title {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 1.5rem;
-    }
-
-    .logo-title img {
-      height: 48px;
-      animation: bounce 2s infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    h1 {
-      font-size: 2rem;
-      margin: 0;
-    }
-
-    input {
-      width: 100%;
-      padding: 1rem;
-      border: none;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      font-size: 1rem;
-    }
-
-    input:focus {
-      outline: none;
-    }
-
-    button {
-      background: #fff;
-      color: #2B6CB0;
-      border: none;
-      padding: 1rem 2rem;
-      font-size: 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.2s;
-      margin-top: 0.5rem;
-      width: 100%;
-    }
-
-    button:hover {
-      transform: translateY(-2px);
-    }
-
-    #greetingInfo {
-      margin-top: 2rem;
-      padding: 1rem;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      text-align: left;
-    }
-
-    .highlight {
-      color: #fff;
-      font-weight: bold;
-    }
-
-    #claimStatus {
-      margin-top: 1rem;
-      font-weight: 600;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <div class="container">
-    <div class="logo-title">
-      <img src="hello.png" alt="Logo">
-      <h1>Hello&nbsp;Base&nbsp;👋</h1>
-    </div>
-
-    <input id="message" type="text" placeholder="Type your GM message..." />
-    <button id="sendGM">🚀 Send GM</button>
-    <button id="claimHI">🎁 Claim 100 HI</button>
-
-    <div id="claimStatus"></div>
-
-    <div id="greetingInfo">
-      <p><strong>Current Greeting:</strong> <span id="currentGreeting" class="highlight">Loading...</span></p>
-      <p><strong>Last Greeter:</strong> <span id="lastGreeter" class="highlight">0x...</span></p>
-      <p><strong>Total Greetings:</strong> <span id="greetingCount" class="highlight">0</span></p>
-    </div>
+  <div class="logo-container">
+    <img src="hello.svg" alt="Hello Base Logo" class="logo" />
   </div>
-
-  <!-- Ethers.js -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <!-- Confetti effect -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-  <script>
-    const gmContractAddress = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
-    const claimContractAddress = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0"; // ← Twój kontrakt claim
-
-    const gmABI = [
-      { type: "function", name: "getGreeting", inputs: [], outputs: [{ type: "string" }], stateMutability: "view" },
-      { type: "function", name: "getGreetingCount", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
-      { type: "function", name: "getLastGreeter", inputs: [], outputs: [{ type: "address" }], stateMutability: "view" },
-      { type: "function", name: "sayGM", inputs: [{ name: "_message", type: "string" }], outputs: [], stateMutability: "nonpayable" }
-    ];
-
-    const claimABI = [
-      { type: "function", name: "claim", inputs: [], outputs: [], stateMutability: "nonpayable" },
-      { type: "function", name: "hasClaimed", inputs: [{ name: "addr", type: "address" }], outputs: [{ type: "bool" }], stateMutability: "view" }
-    ];
-
-    let provider, signer, gmContract, claimContract;
-
-    async function init() {
-      if (!window.ethereum) return alert("Please install MetaMask!");
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      signer = provider.getSigner();
-      gmContract = new ethers.Contract(gmContractAddress, gmABI, signer);
-      claimContract = new ethers.Contract(claimContractAddress, claimABI, signer);
-      updateUI();
-    }
-
-    async function sendGM() {
-      const msg = document.getElementById("message").value.trim();
-      if (!msg) return alert("Enter a GM message!");
-      try {
-        const tx = await gmContract.sayGM(msg);
-        await tx.wait();
-        updateUI();
-      } catch (err) {
-        console.error(err);
-        alert("Transaction failed!");
-      }
-    }
-
-    async function claimHI() {
-      const address = await signer.getAddress();
-      const status = document.getElementById("claimStatus");
-      const already = await claimContract.hasClaimed(address);
-      if (already) return status.textContent = "❌ You've already claimed your 100 HI.";
-
-      try {
-        status.textContent = "⌛ Claiming...";
-        const tx = await claimContract.claim();
-        await tx.wait();
-        status.textContent = "✅ Successfully claimed 100 HI!";
-        confetti(); // 🎉
-      } catch (err) {
-        console.error(err);
-        status.textContent = "❌ Claim failed!";
-      }
-    }
-
-    async function updateUI() {
-      try {
-        const greeting = await gmContract.getGreeting();
-        const greeter = await gmContract.getLastGreeter();
-        const count = await gmContract.getGreetingCount();
-        document.getElementById("currentGreeting").textContent = greeting;
-        document.getElementById("lastGreeter").textContent = greeter;
-        document.getElementById("greetingCount").textContent = count.toString();
-      } catch (e) {
-        console.error("Could not fetch greeting data");
-      }
-    }
-
-    window.addEventListener("load", () => {
-      init();
-      document.getElementById("sendGM").addEventListener("click", sendGM);
-      document.getElementById("claimHI").addEventListener("click", claimHI);
-    });
-  </script>
+  <h1>Hello Base</h1>
+  <div id="wallet-connect">Connect Wallet</div>
+  <div id="gm-form">
+    <input type="text" id="gm-input" placeholder="Say GM..." />
+    <button onclick="sendGM()">Send GM</button>
+  </div>
+  <div id="gm-history"></div>
+  <div id="leaderboard"></div>
+  <div class="buy-section">
+    <a href="https://warpcast.com/~/buy/base:0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0" target="_blank">Buy HI on Farcaster</a>
+  </div>
+  <div class="built-on-base">
+    <img src="built-on-base.svg" alt="Built on Base" />
+  </div>
 </body>
 </html>

@@ -1,0 +1,33 @@
+
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: white;
+  padding: 20px;
+}
+.logo-container {
+  margin-top: 30px;
+}
+.logo {
+  width: 120px;
+  animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+.buy-section a {
+  display: inline-block;
+  margin-top: 30px;
+  padding: 10px 20px;
+  background: white;
+  color: #0072ff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
+.built-on-base img {
+  margin-top: 40px;
+  width: 120px;
+}
