@@ -2,36 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hello Base</title>
-  <link rel="icon" href="data:," />
+  <link rel="icon" href="hello.png" />
   <style>
-   :root {
-      --primary: #6F3AFF;
-      --secondary: #2B6CB0;
-      --background: #F8FAFC;
-      --text: #1A202C;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--background);
-      color: var(--text);
       margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #6F3AFF, #2B6CB0);
+      color: #fff;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      text-align: center;
     }
 
     .container {
-      background: white;
+      background: rgba(255, 255, 255, 0.1);
       padding: 2rem;
       border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
       width: 90%;
       max-width: 480px;
-      text-align: center;
     }
 
     .logo-title {
@@ -43,12 +38,16 @@
     }
 
     .logo-title img {
-      height: 40px;
-      width: auto;
+      height: 48px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
 
     h1 {
-      color: var(--primary);
       font-size: 2rem;
       margin: 0;
     }
@@ -56,7 +55,7 @@
     input {
       width: 100%;
       padding: 1rem;
-      border: 2px solid #E2E8F0;
+      border: none;
       border-radius: 8px;
       margin-bottom: 1rem;
       font-size: 1rem;
@@ -64,18 +63,19 @@
 
     input:focus {
       outline: none;
-      border-color: var(--primary);
     }
 
     button {
-      background: linear-gradient(45deg, var(--primary), var(--secondary));
-      color: white;
+      background: #fff;
+      color: #2B6CB0;
       border: none;
       padding: 1rem 2rem;
       font-size: 1rem;
       border-radius: 8px;
       cursor: pointer;
       transition: transform 0.2s;
+      margin-top: 0.5rem;
+      width: 100%;
     }
 
     button:hover {
@@ -84,30 +84,19 @@
 
     #greetingInfo {
       margin-top: 2rem;
-      padding: 1.5rem;
-      background: #F8FAFF;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.15);
       border-radius: 12px;
       text-align: left;
     }
 
-    #greetingInfo p {
-      margin: 0.5rem 0;
-    }
-
     .highlight {
-      color: var(--secondary);
+      color: #fff;
       font-weight: bold;
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 1.5rem;
-      }
     }
 
     #claimStatus {
       margin-top: 1rem;
-      color: var(--primary);
       font-weight: 600;
     }
   </style>
@@ -115,28 +104,32 @@
 <body>
   <div class="container">
     <div class="logo-title">
-      <img src="hello.png" alt="Hello Logo">
+      <img src="hello.png" alt="Logo">
       <h1>Hello&nbsp;Base&nbsp;👋</h1>
     </div>
 
-    <input id="message" type="text" placeholder="Type your GM message...">
-    <button id="sendGM">🚀 Send&nbsp;GM</button>
-    <button id="claimHI" style="margin-top: 1rem;">🎁 Claim&nbsp;100&nbsp;HI</button>
+    <input id="message" type="text" placeholder="Type your GM message..." />
+    <button id="sendGM">🚀 Send GM</button>
+    <button id="claimHI">🎁 Claim 100 HI</button>
 
+    <div id="claimStatus"></div>
 
     <div id="greetingInfo">
-      <p><strong>Current Greeting:</strong> <span id="currentGreeting" class="highlight">GM, Base!</span></p>
+      <p><strong>Current Greeting:</strong> <span id="currentGreeting" class="highlight">Loading...</span></p>
       <p><strong>Last Greeter:</strong> <span id="lastGreeter" class="highlight">0x...</span></p>
       <p><strong>Total Greetings:</strong> <span id="greetingCount" class="highlight">0</span></p>
     </div>
-
-    <button id="claimButton" style="margin-top:2rem;">🎁 Claim 100 HI</button>
-    <div id="claimStatus"></div>
   </div>
 
+  <!-- Ethers.js -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <!-- Confetti effect -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
   <script>
     const gmContractAddress = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
+    const claimContractAddress = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0"; // ← Twój kontrakt claim
+
     const gmABI = [
       { type: "function", name: "getGreeting", inputs: [], outputs: [{ type: "string" }], stateMutability: "view" },
       { type: "function", name: "getGreetingCount", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
@@ -144,7 +137,6 @@
       { type: "function", name: "sayGM", inputs: [{ name: "_message", type: "string" }], outputs: [], stateMutability: "nonpayable" }
     ];
 
-    const claimContractAddress = "0xYOUR_CLAIM_CONTRACT_ADDRESS"; // <--- TU WSTAWISZ ADRES KONTRAKTU CLAIM
     const claimABI = [
       { type: "function", name: "claim", inputs: [], outputs: [], stateMutability: "nonpayable" },
       { type: "function", name: "hasClaimed", inputs: [{ name: "addr", type: "address" }], outputs: [{ type: "bool" }], stateMutability: "view" }
@@ -164,7 +156,7 @@
 
     async function sendGM() {
       const msg = document.getElementById("message").value.trim();
-      if (!msg) return alert("Enter a message!");
+      if (!msg) return alert("Enter a GM message!");
       try {
         const tx = await gmContract.sayGM(msg);
         await tx.wait();
@@ -175,17 +167,18 @@
       }
     }
 
-    async function claimTokens() {
+    async function claimHI() {
       const address = await signer.getAddress();
-      const alreadyClaimed = await claimContract.hasClaimed(address);
       const status = document.getElementById("claimStatus");
-      if (alreadyClaimed) return status.textContent = "❌ You have already claimed your 100 HI.";
+      const already = await claimContract.hasClaimed(address);
+      if (already) return status.textContent = "❌ You've already claimed your 100 HI.";
 
       try {
-        const tx = await claimContract.claim();
         status.textContent = "⌛ Claiming...";
+        const tx = await claimContract.claim();
         await tx.wait();
         status.textContent = "✅ Successfully claimed 100 HI!";
+        confetti(); // 🎉
       } catch (err) {
         console.error(err);
         status.textContent = "❌ Claim failed!";
@@ -193,43 +186,23 @@
     }
 
     async function updateUI() {
-      const greeting = await gmContract.getGreeting();
-      const greeter = await gmContract.getLastGreeter();
-      const count = await gmContract.getGreetingCount();
-      document.getElementById("currentGreeting").textContent = greeting;
-      document.getElementById("lastGreeter").textContent = greeter;
-      document.getElementById("greetingCount").textContent = count.toString();
+      try {
+        const greeting = await gmContract.getGreeting();
+        const greeter = await gmContract.getLastGreeter();
+        const count = await gmContract.getGreetingCount();
+        document.getElementById("currentGreeting").textContent = greeting;
+        document.getElementById("lastGreeter").textContent = greeter;
+        document.getElementById("greetingCount").textContent = count.toString();
+      } catch (e) {
+        console.error("Could not fetch greeting data");
+      }
     }
 
     window.addEventListener("load", () => {
       init();
       document.getElementById("sendGM").addEventListener("click", sendGM);
-      document.getElementById("claimButton").addEventListener("click", claimTokens);
       document.getElementById("claimHI").addEventListener("click", claimHI);
     });
   </script>
-  const contractABI = [
-  { type:"constructor", inputs:[], stateMutability:"nonpayable" },
-  { type:"function", name:"getGreeting", inputs:[], outputs:[{type:"string"}], stateMutability:"view" },
-  { type:"function", name:"getGreetingCount", inputs:[], outputs:[{type:"uint256"}], stateMutability:"view" },
-  { type:"function", name:"getLastGreeter", inputs:[], outputs:[{type:"address"}], stateMutability:"view" },
-  { type:"function", name:"sayGM", inputs:[{name:"_message",type:"string"}], outputs:[], stateMutability:"nonpayable" },
-  { type:"function", name:"claim", inputs:[], outputs:[], stateMutability:"nonpayable" }
-];
-  async function claimHI() {
-  try {
-    const tx = await contract.claim();
-    await tx.wait();
-    alert("🎉 Successfully claimed 100 HI!");
-  } catch (err) {
-    console.error(err);
-    if (err?.data?.message?.includes("already claimed")) {
-      alert("❗ You've already claimed HI.");
-    } else {
-      alert("❗ Claim failed.");
-    }
-  }
-}
-
 </body>
 </html>
