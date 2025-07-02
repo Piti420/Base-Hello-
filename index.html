@@ -121,6 +121,8 @@
 
     <input id="message" type="text" placeholder="Type your GM message...">
     <button id="sendGM">🚀 Send&nbsp;GM</button>
+    <button id="claimHI" style="margin-top: 1rem;">🎁 Claim&nbsp;100&nbsp;HI</button>
+
 
     <div id="greetingInfo">
       <p><strong>Current Greeting:</strong> <span id="currentGreeting" class="highlight">GM, Base!</span></p>
@@ -203,7 +205,31 @@
       init();
       document.getElementById("sendGM").addEventListener("click", sendGM);
       document.getElementById("claimButton").addEventListener("click", claimTokens);
+      document.getElementById("claimHI").addEventListener("click", claimHI);
     });
   </script>
+  const contractABI = [
+  { type:"constructor", inputs:[], stateMutability:"nonpayable" },
+  { type:"function", name:"getGreeting", inputs:[], outputs:[{type:"string"}], stateMutability:"view" },
+  { type:"function", name:"getGreetingCount", inputs:[], outputs:[{type:"uint256"}], stateMutability:"view" },
+  { type:"function", name:"getLastGreeter", inputs:[], outputs:[{type:"address"}], stateMutability:"view" },
+  { type:"function", name:"sayGM", inputs:[{name:"_message",type:"string"}], outputs:[], stateMutability:"nonpayable" },
+  { type:"function", name:"claim", inputs:[], outputs:[], stateMutability:"nonpayable" }
+];
+  async function claimHI() {
+  try {
+    const tx = await contract.claim();
+    await tx.wait();
+    alert("🎉 Successfully claimed 100 HI!");
+  } catch (err) {
+    console.error(err);
+    if (err?.data?.message?.includes("already claimed")) {
+      alert("❗ You've already claimed HI.");
+    } else {
+      alert("❗ Claim failed.");
+    }
+  }
+}
+
 </body>
 </html>
