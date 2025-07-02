@@ -3,69 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello Base </title>
+  <title>Hello Base</title>
   <link rel="icon" href="data:," />
   <style>
-    :root {
-      --primary: #6F3AFF;   /* fiolet przycisku  */
-      --secondary: #2B6CB0; /* ciemniejszy niebieski przycisku */
-      --background: #F8FAFC;/* bazowy kolor tła kartki */
+   :root {
+      --primary: #6F3AFF;
+      --secondary: #2B6CB0;
+      --background: #F8FAFC;
       --text: #1A202C;
-      --baseBlue: #0052FF;  /* oficjalny Base blue  */
-      --baseCyan: #67E8F9;  /* jaśniejszy akcent  */
     }
 
-    /* ----------  GLOBAL  ---------- */
-    * { box-sizing: border-box; }
     body {
-      position: relative;             /* żeby pseudo‑elementy mogły się „przyklejać” */
-      overflow: hidden;               /* ukrywa wychodzące animacje */
-      margin: 0;
-      min-height: 100vh;
       font-family: 'Inter', sans-serif;
       background: var(--background);
       color: var(--text);
+      margin: 0;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    /* ----------  ANIMOWANE AURA‑TŁO  ---------- */
-    body::before,
-    body::after {
-      content: '';
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,82,255,0.55) 0%, rgba(103,232,249,0.25) 60%, transparent 100%);
-      animation: auraMove 22s linear infinite;
-      pointer-events: none;           /* nie blokuje klikania */
-      filter: blur(40px);
-    }
-    body::before { top: -220px;  left: -220px;  animation-delay: 0s;  }
-    body::after  { bottom: -220px; right: -220px; animation-delay: 11s; }
-
-    @keyframes auraMove {
-      0%   { transform: translate(0,0)   scale(1);   }
-      50%  { transform: translate(60px,-60px) scale(1.2); }
-      100% { transform: translate(0,0)   scale(1);   }
-    }
-
-    /* ----------  KARTA / CONTAINER  ---------- */
     .container {
-      position: relative;             /* żeby aura była pod spodem */
-      background: #fff;
+      background: white;
       padding: 2rem;
       border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
       width: 90%;
       max-width: 480px;
       text-align: center;
-      z-index: 1;                     /* nad aurą */
     }
 
-    /* ----------  NAGŁÓWEK Z LOGO  ---------- */
     .logo-title {
       display: flex;
       align-items: center;
@@ -73,23 +41,18 @@
       gap: 12px;
       margin-bottom: 1.5rem;
     }
+
     .logo-title img {
       height: 40px;
       width: auto;
-      object-fit: contain;
-      animation: logoBounce 3s ease-in-out infinite;
-    }
-    @keyframes logoBounce {
-      0%,100% { transform: translateY(0); }
-      50%     { transform: translateY(-8px); }
-    }
-    h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: var(--baseBlue);
     }
 
-    /* ----------  INPUT & BUTTON  ---------- */
+    h1 {
+      color: var(--primary);
+      font-size: 2rem;
+      margin: 0;
+    }
+
     input {
       width: 100%;
       padding: 1rem;
@@ -98,13 +61,15 @@
       margin-bottom: 1rem;
       font-size: 1rem;
     }
+
     input:focus {
       outline: none;
       border-color: var(--primary);
     }
+
     button {
       background: linear-gradient(45deg, var(--primary), var(--secondary));
-      color: #fff;
+      color: white;
       border: none;
       padding: 1rem 2rem;
       font-size: 1rem;
@@ -112,9 +77,11 @@
       cursor: pointer;
       transition: transform 0.2s;
     }
-    button:hover { transform: translateY(-2px); }
 
-    /* ----------  INFO BOX  ---------- */
+    button:hover {
+      transform: translateY(-2px);
+    }
+
     #greetingInfo {
       margin-top: 2rem;
       padding: 1.5rem;
@@ -122,64 +89,82 @@
       border-radius: 12px;
       text-align: left;
     }
-    #greetingInfo p { margin: .5rem 0; }
-    .highlight { color: var(--secondary); font-weight: 600; }
+
+    #greetingInfo p {
+      margin: 0.5rem 0;
+    }
+
+    .highlight {
+      color: var(--secondary);
+      font-weight: bold;
+    }
 
     @media (max-width: 480px) {
-      .container { padding: 1.5rem; }
+      .container {
+        padding: 1.5rem;
+      }
+    }
+
+    #claimStatus {
+      margin-top: 1rem;
+      color: var(--primary);
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- nagłówek -->
     <div class="logo-title">
-      <!--  ⬇⬇⬇ Upewnij się, że plik PNG leży obok index.html i nazywa się exactly "base-logo.png" ⬇⬇⬇ -->
-      <img src="base-logo.png" alt="Base Logo">
+      <img src="hello.png" alt="Hello Logo">
       <h1>Hello&nbsp;Base&nbsp;👋</h1>
     </div>
 
-    <!-- pole + przycisk -->
     <input id="message" type="text" placeholder="Type your GM message...">
     <button id="sendGM">🚀 Send&nbsp;GM</button>
 
-    <!-- box z info -->
     <div id="greetingInfo">
       <p><strong>Current Greeting:</strong> <span id="currentGreeting" class="highlight">GM, Base!</span></p>
-      <p><strong>Last Greeter:</strong> <span id="lastGreeter"   class="highlight">0x...</span></p>
-      <p><strong>Total Greetings:</strong><span id="greetingCount" class="highlight">0</span></p>
+      <p><strong>Last Greeter:</strong> <span id="lastGreeter" class="highlight">0x...</span></p>
+      <p><strong>Total Greetings:</strong> <span id="greetingCount" class="highlight">0</span></p>
     </div>
+
+    <button id="claimButton" style="margin-top:2rem;">🎁 Claim 100 HI</button>
+    <div id="claimStatus"></div>
   </div>
 
-  <!-- ----------  ETHERS.JS + LOGIKA  ---------- -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
-    const contractAddress = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
-    const contractABI = [
-      { type:"constructor", inputs:[], stateMutability:"nonpayable" },
-      { type:"function", name:"getGreeting", inputs:[], outputs:[{type:"string"}], stateMutability:"view" },
-      { type:"function", name:"getGreetingCount", inputs:[], outputs:[{type:"uint256"}], stateMutability:"view" },
-      { type:"function", name:"getLastGreeter", inputs:[], outputs:[{type:"address"}], stateMutability:"view" },
-      { type:"function", name:"sayGM", inputs:[{name:"_message",type:"string"}], outputs:[], stateMutability:"nonpayable" }
+    const gmContractAddress = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
+    const gmABI = [
+      { type: "function", name: "getGreeting", inputs: [], outputs: [{ type: "string" }], stateMutability: "view" },
+      { type: "function", name: "getGreetingCount", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+      { type: "function", name: "getLastGreeter", inputs: [], outputs: [{ type: "address" }], stateMutability: "view" },
+      { type: "function", name: "sayGM", inputs: [{ name: "_message", type: "string" }], outputs: [], stateMutability: "nonpayable" }
     ];
 
-    let provider, signer, contract;
+    const claimContractAddress = "0xYOUR_CLAIM_CONTRACT_ADDRESS"; // <--- TU WSTAWISZ ADRES KONTRAKTU CLAIM
+    const claimABI = [
+      { type: "function", name: "claim", inputs: [], outputs: [], stateMutability: "nonpayable" },
+      { type: "function", name: "hasClaimed", inputs: [{ name: "addr", type: "address" }], outputs: [{ type: "bool" }], stateMutability: "view" }
+    ];
+
+    let provider, signer, gmContract, claimContract;
 
     async function init() {
-      if (!window.ethereum) { alert("Please install MetaMask!"); return; }
-      provider  = new ethers.providers.Web3Provider(window.ethereum);
+      if (!window.ethereum) return alert("Please install MetaMask!");
+      provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
-      signer    = provider.getSigner();
-      contract  = new ethers.Contract(contractAddress, contractABI, signer);
+      signer = provider.getSigner();
+      gmContract = new ethers.Contract(gmContractAddress, gmABI, signer);
+      claimContract = new ethers.Contract(claimContractAddress, claimABI, signer);
       updateUI();
     }
 
     async function sendGM() {
       const msg = document.getElementById("message").value.trim();
       if (!msg) return alert("Enter a message!");
-
       try {
-        const tx = await contract.sayGM(msg);
+        const tx = await gmContract.sayGM(msg);
         await tx.wait();
         updateUI();
       } catch (err) {
@@ -188,18 +173,36 @@
       }
     }
 
+    async function claimTokens() {
+      const address = await signer.getAddress();
+      const alreadyClaimed = await claimContract.hasClaimed(address);
+      const status = document.getElementById("claimStatus");
+      if (alreadyClaimed) return status.textContent = "❌ You have already claimed your 100 HI.";
+
+      try {
+        const tx = await claimContract.claim();
+        status.textContent = "⌛ Claiming...";
+        await tx.wait();
+        status.textContent = "✅ Successfully claimed 100 HI!";
+      } catch (err) {
+        console.error(err);
+        status.textContent = "❌ Claim failed!";
+      }
+    }
+
     async function updateUI() {
-      const greeting = await contract.getGreeting();
-      const greeter  = await contract.getLastGreeter();
-      const count    = await contract.getGreetingCount();
+      const greeting = await gmContract.getGreeting();
+      const greeter = await gmContract.getLastGreeter();
+      const count = await gmContract.getGreetingCount();
       document.getElementById("currentGreeting").textContent = greeting;
-      document.getElementById("lastGreeter").textContent     = greeter;
-      document.getElementById("greetingCount").textContent   = count.toString();
+      document.getElementById("lastGreeter").textContent = greeter;
+      document.getElementById("greetingCount").textContent = count.toString();
     }
 
     window.addEventListener("load", () => {
       init();
       document.getElementById("sendGM").addEventListener("click", sendGM);
+      document.getElementById("claimButton").addEventListener("click", claimTokens);
     });
   </script>
 </body>
