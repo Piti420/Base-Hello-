@@ -1,68 +1,51 @@
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+  padding: 0;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  font-family: 'Arial', sans-serif;
+  color: #fff;
   text-align: center;
 }
 
-.logo-container {
-  animation: float 6s ease-in-out infinite;
+.container {
+  margin-top: 5%;
 }
 
 .logo {
   width: 120px;
-  margin-bottom: 20px;
+  animation: float 4s ease-in-out infinite;
 }
 
 h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-}
-
-p {
-  font-size: 1rem;
-  color: #aaa;
-}
-
-.button-container {
-  margin-top: 20px;
+  font-size: 2.5em;
+  margin: 20px 0;
 }
 
 button {
-  background: #4facfe;
+  padding: 12px 20px;
+  margin: 10px;
   border: none;
-  border-radius: 25px;
-  padding: 12px 25px;
-  margin: 0 10px;
-  color: white;
+  border-radius: 8px;
+  background: #1ed760;
+  color: #000;
   font-weight: bold;
-  font-size: 1rem;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s ease;
 }
 
 button:hover {
-  background: #00f2fe;
+  background: #1db954;
 }
 
-.gm-counter {
-  margin-top: 30px;
-  font-size: 1.2rem;
-  color: #eee;
+.base-badge {
+  width: 120px;
+  margin-top: 40px;
+  opacity: 0.8;
 }
 
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  0% { transform: translatey(0px); }
+  50% { transform: translatey(-10px); }
+  100% { transform: translatey(0px); }
 }

@@ -1,0 +1,12 @@
+{
+  "name": "Hello Base World",
+  "description": "Discover the futuristic world of Hello Base. Claim your HI token & say GM!",
+  "image": "https://piti420.github.io/Base-Hello/hello-frame.png",
+  "buttons": [
+    {
+      "label": "Visit Hello Base",
+      "action": "link",
+      "target": "https://piti420.github.io/Base-Hello/"
+    }
+  ]
+}
