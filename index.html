@@ -1,24 +1,129 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hello Base World</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script defer src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
+  <script src="https://unpkg.com/web3modal@1.9.12/dist/index.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: radial-gradient(ellipse at center, #0d1a36 0%, #000 100%);
+      color: white;
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    #logo {
+      width: 150px;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(45deg, #00c6ff, #0072ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-top: 20px;
+    }
+
+    button {
+      margin: 10px;
+      padding: 15px 30px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #00DBDE 0%, #FC00FF 100%);
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    #footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 0.9rem;
+      color: #00c6ff;
+      letter-spacing: 1px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <img src="hello.png" class="logo" alt="Hello Base logo"/>
-    <h1>Hello Base World</h1>
-    <p id="gmCount">Total GMs: 0</p>
-    <button id="connectWallet">Connect Wallet</button>
-    <button id="sayGM">Say GM</button>
-    <button id="claimButton">Claim 100 HI</button>
-    <div id="status"></div>
-    <img src="built-on-base.svg" class="base-badge" alt="Built on Base" />
-  </div>
+  <img id="logo" src="hello.png" alt="Hello Base Logo">
+  <h1>Hello Base World</h1>
+  <button onclick="sayGM()">GREET ONCHAIN 🚀</button>
+  <button onclick="claimHI()">CLAIM 100 HI</button>
+  <div id="footer">🚀 Built on Base 🚀</div>
+
+  <script>
+    const GM_CONTRACT = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
+    const HI_TOKEN_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
+    const CLAIM_ABI = ["function claim() public"];
+    const GM_ABI = ["function sayGM() public"];
+
+    let provider, signer;
+
+    async function connectWallet() {
+      const web3Modal = new window.Web3Modal.default({
+        cacheProvider: false,
+        providerOptions: {
+          walletconnect: {
+            package: window.WalletConnectProvider.default,
+            options: {
+              infuraId: "1f800a1ef5e045f9b1a7a4c432bb4edb"
+            }
+          }
+        }
+      });
+      const instance = await web3Modal.connect();
+      provider = new ethers.providers.Web3Provider(instance);
+      signer = provider.getSigner();
+    }
+
+    async function sayGM() {
+      await connectWallet();
+      const contract = new ethers.Contract(GM_CONTRACT, GM_ABI, signer);
+      try {
+        const tx = await contract.sayGM();
+        await tx.wait();
+        alert("GM sent successfully onchain!");
+      } catch (err) {
+        console.error(err);
+        alert("Error sending GM: " + err.message);
+      }
+    }
+
+    async function claimHI() {
+      await connectWallet();
+      const contract = new ethers.Contract(HI_TOKEN_CONTRACT, CLAIM_ABI, signer);
+      try {
+        const tx = await contract.claim();
+        await tx.wait();
+        alert("You claimed 100 HI tokens!");
+      } catch (err) {
+        console.error(err);
+        alert("Claim failed: " + err.message);
+      }
+    }
+  </script>
 </body>
 </html>
