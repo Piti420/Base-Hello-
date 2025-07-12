@@ -1,5 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+  <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hello Base World</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/@coinbase/wallet-sdk"></script>
+    <script src="https://unpkg.com/web3modal"></script>
+    <script src="https://unpkg.com/evm-chains"></script>
+    <script defer src="script.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <img src="hello.png" alt="Hello Base Logo" class="logo" />
+      <h1>Hello Base World</h1>
+
+      <div class="buttons">
+        <button id="connectWallet">Connect Wallet</button>
+        <button id="sayGM">Greet Onchain</button>
+        <button id="claimButton">Claim 100 HI</button>
+      </div>
+
+      <div class="status" id="status"></div>
+      <div class="gm-count" id="gmCount"></div>
+
+      <div id="socialShare" style="display:none">
+        <p>✅ Greeted onchain!</p>
+        <a id="shareFarcaster" target="_blank">Share on Farcaster</a>
+        <a id="shareTwitter" target="_blank">Share on Twitter</a>
+      </div>
+    </div>
+
+    <footer>
+      <p class="build-on-base">Built on <strong>Base</strong> 🚀</p>
+    </footer>
+  </body>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
