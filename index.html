@@ -3,125 +3,136 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello Base World</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
-  <script src="https://unpkg.com/web3modal@1.9.12/dist/index.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <title>Hello Base</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      padding: 0;
-      height: 100vh;
-      background: radial-gradient(ellipse at center, #0d1a36 0%, #000 100%);
-      color: white;
       font-family: 'Orbitron', sans-serif;
+      background: radial-gradient(circle at center, #091E3A 0%, #020C1B 100%);
+      color: white;
+      text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      text-align: center;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
-
-    #logo {
-      width: 150px;
-      animation: float 4s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
     h1 {
-      font-size: 2.5rem;
-      background: linear-gradient(45deg, #00c6ff, #0072ff);
+      font-size: 3em;
+      margin-bottom: 0.3em;
+      background: linear-gradient(90deg, #00D1FF, #00FFA3);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-top: 20px;
     }
-
+    #logo {
+      width: 160px;
+      margin-bottom: 20px;
+    }
     button {
-      margin: 10px;
-      padding: 15px 30px;
-      font-size: 1rem;
-      font-weight: bold;
+      background-color: #00D1FF;
+      color: #000;
+      font-size: 1.1em;
+      padding: 0.8em 1.5em;
+      margin: 0.5em;
       border: none;
-      border-radius: 12px;
-      background: linear-gradient(90deg, #00DBDE 0%, #FC00FF 100%);
-      color: white;
+      border-radius: 10px;
       cursor: pointer;
-      transition: 0.3s;
+      transition: all 0.2s ease-in-out;
     }
-
     button:hover {
       transform: scale(1.05);
+      background-color: #00FFA3;
     }
-
     #footer {
       position: absolute;
       bottom: 10px;
-      font-size: 0.9rem;
-      color: #00c6ff;
-      letter-spacing: 1px;
+      width: 100%;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+    #socials {
+      margin-top: 20px;
+    }
+    #socials button {
+      background: none;
+      border: 1px solid #00D1FF;
+      color: #00D1FF;
+      padding: 0.5em 1em;
+      margin: 5px;
+      border-radius: 6px;
     }
   </style>
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
 </head>
 <body>
   <img id="logo" src="hello.png" alt="Hello Base Logo">
   <h1>Hello Base World</h1>
-  <button onclick="sayGM()">GREET ONCHAIN 🚀</button>
-  <button onclick="claimHI()">CLAIM 100 HI</button>
-  <div id="footer">🚀 Built on Base 🚀</div>
+
+  <button onclick="connectWallet()">Connect Wallet</button>
+  <button onclick="sayGM()">Greet Onchain</button>
+  <button onclick="claimHI()">Claim 100 HI</button>
+
+  <div id="socials" style="display:none;">
+    <p>✅ Onchain greeting sent!</p>
+    <button onclick="share('twitter')">Share on Twitter</button>
+    <button onclick="share('farcaster')">Share on Farcaster</button>
+  </div>
+
+  <div id="footer">
+    <p>🚀 Built on <strong style="color:#00FFA3;">Base</strong></p>
+  </div>
 
   <script>
     const GM_CONTRACT = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
-    const HI_TOKEN_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
-    const CLAIM_ABI = ["function claim() public"];
-    const GM_ABI = ["function sayGM() public"];
-
+    const HI_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
     let provider, signer;
 
     async function connectWallet() {
-      const web3Modal = new window.Web3Modal.default({
-        cacheProvider: false,
-        providerOptions: {
-          walletconnect: {
-            package: window.WalletConnectProvider.default,
-            options: {
-              infuraId: "1f800a1ef5e045f9b1a7a4c432bb4edb"
-            }
-          }
-        }
-      });
-      const instance = await web3Modal.connect();
-      provider = new ethers.providers.Web3Provider(instance);
-      signer = provider.getSigner();
+      if (window.ethereum) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        console.log("Wallet connected");
+      } else {
+        alert("Please install MetaMask or a compatible wallet.");
+      }
     }
 
     async function sayGM() {
-      await connectWallet();
-      const contract = new ethers.Contract(GM_CONTRACT, GM_ABI, signer);
       try {
-        const tx = await contract.sayGM();
+        if (!signer) await connectWallet();
+        const contract = new ethers.Contract(GM_CONTRACT, ["function gm() public"], signer);
+        const tx = await contract.gm();
         await tx.wait();
-        alert("GM sent successfully onchain!");
+        document.getElementById("socials").style.display = 'block';
       } catch (err) {
+        alert("Failed to send GM. Make sure wallet is connected and try again.");
         console.error(err);
-        alert("Error sending GM: " + err.message);
       }
     }
 
     async function claimHI() {
-      await connectWallet();
-      const contract = new ethers.Contract(HI_TOKEN_CONTRACT, CLAIM_ABI, signer);
       try {
+        if (!signer) await connectWallet();
+        const contract = new ethers.Contract(HI_CONTRACT, ["function claim() public"], signer);
         const tx = await contract.claim();
         await tx.wait();
-        alert("You claimed 100 HI tokens!");
+        alert("🎉 100 HI Claimed!");
       } catch (err) {
+        alert("❌ Claim failed. You may have already claimed or an error occurred.");
         console.error(err);
-        alert("Claim failed: " + err.message);
+      }
+    }
+
+    function share(platform) {
+      const url = encodeURIComponent("https://yourdomain.xyz");
+      const msg = encodeURIComponent("Just greeted the chain with a GM and claimed $HI on Base!");
+      if (platform === 'twitter') {
+        window.open(`https://twitter.com/intent/tweet?text=${msg}&url=${url}`);
+      } else if (platform === 'farcaster') {
+        window.open(`https://warpcast.com/~/compose?text=${msg} ${url}`);
       }
     }
   </script>
