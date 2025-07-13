@@ -1,178 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
-  <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello Base World</title>
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <script src="https://unpkg.com/@coinbase/wallet-sdk"></script>
-    <script src="https://unpkg.com/web3modal"></script>
-    <script src="https://unpkg.com/evm-chains"></script>
-    <script defer src="script.js"></script>
-  </head>
-  <body>
-    <div class="container">
-      <img src="hello.png" alt="Hello Base Logo" class="logo" />
-      <h1>Hello Base World</h1>
-
-      <div class="buttons">
-        <button id="connectWallet">Connect Wallet</button>
-        <button id="sayGM">Greet Onchain</button>
-        <button id="claimButton">Claim 100 HI</button>
-      </div>
-
-      <div class="status" id="status"></div>
-      <div class="gm-count" id="gmCount"></div>
-
-      <div id="socialShare" style="display:none">
-        <p>✅ Greeted onchain!</p>
-        <a id="shareFarcaster" target="_blank">Share on Farcaster</a>
-        <a id="shareTwitter" target="_blank">Share on Twitter</a>
-      </div>
-    </div>
-
-    <footer>
-      <p class="build-on-base">Built on <strong>Base</strong> 🚀</p>
-    </footer>
-  </body>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello Base</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: radial-gradient(circle at center, #091E3A 0%, #020C1B 100%);
-      color: white;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    h1 {
-      font-size: 3em;
-      margin-bottom: 0.3em;
-      background: linear-gradient(90deg, #00D1FF, #00FFA3);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    #logo {
-      width: 160px;
-      margin-bottom: 20px;
-    }
-    button {
-      background-color: #00D1FF;
-      color: #000;
-      font-size: 1.1em;
-      padding: 0.8em 1.5em;
-      margin: 0.5em;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s ease-in-out;
-    }
-    button:hover {
-      transform: scale(1.05);
-      background-color: #00FFA3;
-    }
-    #footer {
-      position: absolute;
-      bottom: 10px;
-      width: 100%;
-      font-size: 0.9em;
-      opacity: 0.8;
-    }
-    #socials {
-      margin-top: 20px;
-    }
-    #socials button {
-      background: none;
-      border: 1px solid #00D1FF;
-      color: #00D1FF;
-      padding: 0.5em 1em;
-      margin: 5px;
-      border-radius: 6px;
-    }
-  </style>
-  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+  <title>Hello Base World</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script defer src="app.js"></script>
 </head>
 <body>
-  <img id="logo" src="hello.png" alt="Hello Base Logo">
-  <h1>Hello Base World</h1>
+  <div class="container">
+    <img src="hello.png" alt="Hello Logo" class="logo" />
 
-  <button onclick="connectWallet()">Connect Wallet</button>
-  <button onclick="sayGM()">Greet Onchain</button>
-  <button onclick="claimHI()">Claim 100 HI</button>
+    <h1 class="title">Hello Base World</h1>
 
-  <div id="socials" style="display:none;">
-    <p>✅ Onchain greeting sent!</p>
-    <button onclick="share('twitter')">Share on Twitter</button>
-    <button onclick="share('farcaster')">Share on Farcaster</button>
-  </div>
+    <div class="buttons">
+      <button id="connectWallet">Connect Wallet</button>
+      <button id="greetButton">Greet Onchain</button>
+      <button id="claimButton">Claim 100 HI</button>
+    </div>
 
-  <div id="footer">
-    <p>🚀 Built on <strong style="color:#00FFA3;">Base</strong></p>
+    <div id="status"></div>
+    <div id="gmCount"></div>
+
+    <div id="shareButtons" style="display: none">
+      <p>✅ Greeted successfully! Share it:</p>
+      <a href="#" target="_blank" id="shareTwitter">Share on Twitter</a> |
+      <a href="https://warpcast.com/~/compose?text=gm%20from%20Hello%20Base%20on%20Base!%20%F0%9F%9A%80" target="_blank">Share on Farcaster</a>
+    </div>
+
+    <footer>
+      <p class="built">🚀 Built on Base</p>
+    </footer>
   </div>
 
   <script>
+    let provider;
+    let signer;
+    let userAddress;
+
     const GM_CONTRACT = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
-    const HI_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
-    let provider, signer;
+    const HI_TOKEN_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
+
+    const gmABI = [
+      "function gm() public",
+      "function getGMCount(address) view returns (uint256)"
+    ];
+
+    const hiABI = [
+      "function claim() public",
+      "function claimed(address) view returns (bool)"
+    ];
 
     async function connectWallet() {
-      if (window.ethereum) {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        provider = new ethers.providers.Web3Provider(window.ethereum);
+      try {
+        provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+        await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
-        console.log("Wallet connected");
-      } else {
-        alert("Please install MetaMask or a compatible wallet.");
+        userAddress = await signer.getAddress();
+        document.getElementById("status").innerText = `Connected: ${userAddress}`;
+        updateGMCount();
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").innerText = "Wallet connection failed.";
       }
     }
 
-    async function sayGM() {
+    async function greetOnchain() {
       try {
-        if (!signer) await connectWallet();
-        const contract = new ethers.Contract(GM_CONTRACT, ["function gm() public"], signer);
+        const contract = new ethers.Contract(GM_CONTRACT, gmABI, signer);
         const tx = await contract.gm();
         await tx.wait();
-        document.getElementById("socials").style.display = 'block';
+        document.getElementById("status").innerText = "✅ Greeted onchain!";
+        document.getElementById("shareButtons").style.display = "block";
+        document.getElementById("shareTwitter").href = `https://twitter.com/intent/tweet?text=gm%20from%20Hello%20Base%20on%20Base!%20%F0%9F%9A%80`;
+        updateGMCount();
       } catch (err) {
-        alert("Failed to send GM. Make sure wallet is connected and try again.");
         console.error(err);
+        document.getElementById("status").innerText = "❌ Failed to send GM. Make sure wallet is connected and try again.";
       }
     }
 
     async function claimHI() {
       try {
-        if (!signer) await connectWallet();
-        const contract = new ethers.Contract(HI_CONTRACT, ["function claim() public"], signer);
+        const contract = new ethers.Contract(HI_TOKEN_CONTRACT, hiABI, signer);
+        const alreadyClaimed = await contract.claimed(userAddress);
+        if (alreadyClaimed) {
+          document.getElementById("status").innerText = "You already claimed your 100 HI.";
+          return;
+        }
         const tx = await contract.claim();
         await tx.wait();
-        alert("🎉 100 HI Claimed!");
+        document.getElementById("status").innerText = "✅ Claimed 100 HI!";
       } catch (err) {
-        alert("❌ Claim failed. You may have already claimed or an error occurred.");
         console.error(err);
+        document.getElementById("status").innerText = "❌ Claim failed. Make sure wallet is connected and try again.";
       }
     }
 
-    function share(platform) {
-      const url = encodeURIComponent("https://yourdomain.xyz");
-      const msg = encodeURIComponent("Just greeted the chain with a GM and claimed $HI on Base!");
-      if (platform === 'twitter') {
-        window.open(`https://twitter.com/intent/tweet?text=${msg}&url=${url}`);
-      } else if (platform === 'farcaster') {
-        window.open(`https://warpcast.com/~/compose?text=${msg} ${url}`);
+    async function updateGMCount() {
+      try {
+        const contract = new ethers.Contract(GM_CONTRACT, gmABI, provider);
+        const count = await contract.getGMCount(userAddress);
+        document.getElementById("gmCount").innerText = `Total GM's: ${count.toString()}`;
+      } catch (err) {
+        console.error(err);
+        document.getElementById("gmCount").innerText = "";
       }
     }
+
+    // Event listeners
+    window.addEventListener("load", async () => {
+      if (window.ethereum) {
+        await connectWallet();
+      }
+    });
+
+    document.getElementById("connectWallet").addEventListener("click", connectWallet);
+    document.getElementById("greetButton").addEventListener("click", greetOnchain);
+    document.getElementById("claimButton").addEventListener("click", claimHI);
   </script>
 </body>
 </html>
