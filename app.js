@@ -1,52 +1,63 @@
-
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 let signer;
-const gmContractAddress = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
-const gmABI = [{"inputs":[],"name":"gm","outputs":[],"stateMutability":"nonpayable","type":"function"}, {"inputs":[],"name":"gmCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
+const greetContractAddress = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
+const tokenContractAddress = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
 
-const hiTokenAddress = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
-const hiABI = [{"inputs":[],"name":"claim","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+const greetAbi = [
+  "function greet() public",
+  "function greetings(address) view returns (bool)"
+];
+
+const tokenAbi = [
+  "function claim() public",
+  "function balanceOf(address owner) view returns (uint256)"
+];
 
 async function connectWallet() {
-  await provider.send("eth_requestAccounts", []);
-  signer = provider.getSigner();
-  document.getElementById("status").textContent = "Wallet connected!";
-}
-
-async function sayGM() {
-  if (!signer) return alert("Please connect wallet first.");
-  const gmContract = new ethers.Contract(gmContractAddress, gmABI, signer);
   try {
-    const tx = await gmContract.gm();
-    await tx.wait();
-    updateGMCount();
-    document.getElementById("status").textContent = "GM sent!";
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
+    document.getElementById("status").innerText = "Wallet connected ✅";
   } catch (err) {
-    document.getElementById("status").textContent = "GM failed.";
-    console.error(err);
+    document.getElementById("status").innerText = "❌ Wallet connection failed";
   }
 }
 
-async function updateGMCount() {
-  const contract = new ethers.Contract(gmContractAddress, gmABI, provider);
-  const count = await contract.gmCount();
-  document.getElementById("gmCount").textContent = "Total GMs: " + count;
+async function greetOnChain() {
+  try {
+    const contract = new ethers.Contract(greetContractAddress, greetAbi, signer);
+    const tx = await contract.greet();
+    await tx.wait();
+    document.getElementById("status").innerText = "✅ You greeted onchain!";
+    document.getElementById("share").style.display = "block";
+  } catch (err) {
+    document.getElementById("status").innerText = "❌ Failed to send GM. Make sure wallet is connected and try again.";
+  }
 }
 
 async function claimHI() {
-  if (!signer) return alert("Please connect wallet first.");
-  const hiContract = new ethers.Contract(hiTokenAddress, hiABI, signer);
   try {
-    const tx = await hiContract.claim();
+    const contract = new ethers.Contract(tokenContractAddress, tokenAbi, signer);
+    const tx = await contract.claim();
     await tx.wait();
-    document.getElementById("status").textContent = "100 HI claimed!";
+    document.getElementById("status").innerText = "✅ 100 HI claimed!";
   } catch (err) {
-    document.getElementById("status").textContent = "Claim failed.";
-    console.error(err);
+    document.getElementById("status").innerText = "❌ Failed to claim HI. Possibly already claimed.";
   }
 }
 
-document.getElementById("connectWallet").onclick = connectWallet;
-document.getElementById("sayGM").onclick = sayGM;
-document.getElementById("claimButton").onclick = claimHI;
-window.onload = updateGMCount;
+function shareOnTwitter() {
+  const text = encodeURIComponent("I just greeted the Base world 🌍 and claimed $HI on Hello Base! #HelloBase #Base #Farcaster");
+  const url = "https://twitter.com/intent/tweet?text=" + text;
+  window.open(url, "_blank");
+}
+
+function shareOnFarcaster() {
+  const text = "I just greeted the Base world 🌍 and claimed $HI on Hello Base!";
+  const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+  window.open(url, "_blank");
+}
+
+window.onload = () => {
+  connectWallet();
+};
