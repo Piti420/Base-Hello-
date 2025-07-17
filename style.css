@@ -105,6 +105,8 @@ body {
 
 .gm-button {
   margin: 1.5rem 0;
+  display: flex;
+  justify-content: center; /* Centruje przycisk GM w poziomie */
 }
 
 #gmButton {
