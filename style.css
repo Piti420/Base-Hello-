@@ -98,22 +98,35 @@ body {
   box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
 }
 
+.buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gm-button {
+  margin: 1.5rem 0;
+}
+
 #gmButton {
-  background: linear-gradient(45deg, #FF007A, #FF4DA6); /* Różowy akcent dla przycisku GM */
+  background: linear-gradient(45deg, #0052FF, #00D4FF);
+  color: #FFFFFF;
+  border: none;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #gmButton:hover {
-  box-shadow: 0 6px 20px rgba(255, 77, 166, 0.6);
-}
-
-#status, #gmCount {
-  font-size: 1.2rem;
-  margin: 1.5rem 0;
-  padding: 1rem;
-  background: rgba(0, 82, 255, 0.1);
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
-  animation: slideIn 1s ease-in-out;
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
 }
 
 #shareButtons {
@@ -148,15 +161,22 @@ footer a:hover {
   text-decoration: underline;
 }
 
+/* Styl dla toastr */
+.toast {
+  background: rgba(0, 82, 255, 0.9) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5) !important;
+  font-family: 'Orbitron', sans-serif !important;
+}
+
+.toast-success { background: rgba(0, 212, 255, 0.9) !important; }
+.toast-error { background: rgba(255, 77, 77, 0.9) !important; }
+.toast-info { background: rgba(77, 153, 255, 0.9) !important; }
+
 /* Animacje */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(-20px); }
-  to { opacity: 1; transform: translateX(0); }
 }
 
 /* Responsywność */
@@ -165,4 +185,5 @@ footer a:hover {
   .logo { width: 120px; }
   #greetingInput { width: 90%; }
   .buttons { flex-direction: column; }
+  #gmButton { width: 60px; height: 60px; font-size: 1rem; }
 }
