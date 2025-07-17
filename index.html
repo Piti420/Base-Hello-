@@ -1,36 +1,25 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hello Base</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script defer src="app.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <img src="hello.png" alt="Hello Logo" class="logo" />
-    <h1 class="title">Hello Base World</h1>
+    <img src="hello.svg" alt="Hello Base Logo" class="logo" />
+    <h1>Hello Base 👋</h1>
 
-    <div class="buttons">
-      <button id="connectWallet">Connect Wallet</button>
-      <button id="greetButton">Greet Onchain</button>
-      <button id="claimButton">Claim 100 HI</button>
-    </div>
+    <button id="connectButton">Connect Wallet</button>
+    <button id="greetButton">Greet Onchain</button>
+    <button id="claimButton">Claim 100 $HI</button>
 
-    <div id="status"></div>
-    <div id="gmCount"></div>
-
-    <div id="shareButtons" style="display: none">
-      <p>✅ Greeted successfully! Share it:</p>
-      <a href="#" target="_blank" id="shareTwitter">Share on Twitter</a> |
-      <a href="https://warpcast.com/~/compose?text=gm%20from%20Hello%20Base%20on%20Base!%20%F0%9F%9A%80" target="_blank">Share on Farcaster</a>
-    </div>
-
-    <footer>
-      <p class="built">🚀 Built on Base</p>
-    </footer>
+    <p id="status"></p>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
