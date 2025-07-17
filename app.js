@@ -1,6 +1,7 @@
 // Konfiguracja adresów kontraktów
 const GM_CONTRACT = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
-const HI_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0"; // Claim 100 HI
+const HI_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
+const WEBSITE_URL = "https://yourusername.github.io/your-repo"; // Zastąp swoim URL-em GitHub Pages
 
 let provider;
 let signer;
@@ -15,17 +16,14 @@ const gmABI = [
   "event NewGM(address indexed greeter, string message)"
 ];
 
-// ABI kontraktu HI (claim)
-const hiABI = [
-  "function claim() public"
-];
+// ABI kontraktu HI
+const hiABI = ["function claim() public"];
 
 // Sprawdzenie sieci Base
 async function checkNetwork() {
   const chainId = await window.ethereum.request({ method: 'eth_chainId' });
   const baseMainnetChainId = '0x2105'; // 8453 w hex
-  const baseSepoliaChainId = '0x14a34'; // 84532 w hex
-  if (chainId !== baseMainnetChainId && chainId !== baseSepoliaChainId) {
+  if (chainId !== baseMainnetChainId) {
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
@@ -39,11 +37,7 @@ async function checkNetwork() {
             chainId: baseMainnetChainId,
             chainName: 'Base Mainnet',
             rpcUrls: ['https://mainnet.base.org'],
-            nativeCurrency: {
-              name: 'ETH',
-              symbol: 'ETH',
-              decimals: 18
-            },
+            nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
             blockExplorerUrls: ['https://basescan.org']
           }],
         });
@@ -62,6 +56,7 @@ async function connectWallet() {
       userAddress = await signer.getAddress();
       document.getElementById("status").innerText = `🟢 Connected: ${userAddress}`;
       await checkNetwork();
+      await updateGreetingInfo();
     } catch (err) {
       console.error("Connect error:", err);
       document.getElementById("status").innerText = "❌ Failed to connect wallet.";
@@ -71,25 +66,40 @@ async function connectWallet() {
   }
 }
 
-// Greet Onchain z gasLimit
+// Aktualizacja informacji o powitaniach
+async function updateGreetingInfo() {
+  try {
+    const contract = new ethers.Contract(GM_CONTRACT, gmABI, provider);
+    const greeting = await contract.getGreeting();
+    const count = await contract.getGreetingCount();
+    const lastGreeter = await contract.getLastGreeter();
+    document.getElementById("gmCount").innerText = `Current Greeting: ${greeting} | Total Greetings: ${count} | Last Greeter: ${lastGreeter}`;
+  } catch (err) {
+    console.error("Error fetching greeting info:", err);
+  }
+}
+
+// Greet Onchain
 async function greetOnchain() {
   try {
     if (!signer) return alert("Connect your wallet first");
 
     await checkNetwork();
     const contract = new ethers.Contract(GM_CONTRACT, gmABI, signer);
-    const message = "Hello from Base"; // Możesz dodać input w HTML, by użytkownik wpisał wiadomość
+    const message = document.getElementById("greetingInput").value || "Hello from Base";
+    if (!message) return alert("Please enter a greeting message");
     const tx = await contract.sayGM(message, { gasLimit: 150000 });
     await tx.wait();
 
     document.getElementById("status").innerText = "✅ Greeted onchain!";
     document.getElementById("shareButtons").style.display = "block";
     animateLogo();
+    await updateGreetingInfo();
 
-    // Odczyt powitania
-    const greeting = await contract.getGreeting();
-    const count = await contract.getGreetingCount();
-    document.getElementById("gmCount").innerText = `Current Greeting: ${greeting} | Total Greetings: ${count}`;
+    // Dynamiczne linki do udostępniania
+    const shareText = encodeURIComponent(`I just said "${message}" on Base! 🚀 Join the community at ${WEBSITE_URL} #Base #Web3`);
+    document.getElementById("shareTwitter").href = `https://twitter.com/intent/tweet?text=${shareText}`;
+    document.getElementById("shareFarcaster").href = `https://warpcast.com/~/compose?text=${shareText}`;
   } catch (err) {
     console.error("Greet error:", err);
     document.getElementById("status").innerText = "❌ Failed to send GM. Check wallet or try again.";
@@ -114,7 +124,7 @@ async function claimHI() {
   }
 }
 
-// Animacja logo po sukcesie
+// Animacja logo
 function animateLogo() {
   const logo = document.getElementById("helloLogo");
   if (!logo) return;
@@ -123,9 +133,10 @@ function animateLogo() {
   setTimeout(() => logo.classList.remove("pulse"), 1000);
 }
 
-// Przypnij event listenery
+// Inicjalizacja
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("connectWallet").addEventListener("click", connectWallet);
   document.getElementById("greetButton").addEventListener("click", greetOnchain);
   document.getElementById("claimButton").addEventListener("click", claimHI);
+  updateGreetingInfo(); // Wyświetl dane z kontraktu przy ładowaniu strony
 });
