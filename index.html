@@ -7,8 +7,10 @@
   <meta name="keywords" content="Base, blockchain, Web3, Ethereum L2, community" />
   <title>Hello Base World</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 </head>
 <body>
   <div id="particles-js"></div>
@@ -24,12 +26,11 @@
     <div class="buttons">
       <button id="connectWallet">Connect Wallet</button>
       <button id="greetButton">Greet Onchain</button>
-      <button id="gmButton">GM</button>
       <button id="claimButton">Claim 100 HI</button>
     </div>
-
-    <div id="status"></div>
-    <div id="gmCount"></div>
+    <div class="gm-button">
+      <button id="gmButton">GM</button>
+    </div>
 
     <div id="shareButtons" style="display: none">
       <p>✅ Greeted successfully! Share it with the Base community:</p>
@@ -38,7 +39,7 @@
     </div>
 
     <footer>
-      <p class="built">🚀 Built on Base | <a href="https://base.org" target="_blank">Explore Base</a> | <a href="https://basescan.org/address/0x06B17752e177681e5Df80e0996228D7d1dB2F61b" target="_blank">View Contract</a></p>
+      <p class="built">🚀 Built on Base | <a href="https://base.org" target="_blank">Explore Base</a> | <a href="https://basescan.org/address/0x06B17752e177681e5Df80e0996228D7d1dB2F61b" target="_blank">View GM Contract</a> | <a href="https://basescan.org/address/0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0" target="_blank">View HI Contract</a></p>
     </footer>
   </div>
 
