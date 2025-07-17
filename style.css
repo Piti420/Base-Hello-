@@ -98,6 +98,14 @@ body {
   box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
 }
 
+#gmButton {
+  background: linear-gradient(45deg, #FF007A, #FF4DA6); /* Różowy akcent dla przycisku GM */
+}
+
+#gmButton:hover {
+  box-shadow: 0 6px 20px rgba(255, 77, 166, 0.6);
+}
+
 #status, #gmCount {
   font-size: 1.2rem;
   margin: 1.5rem 0;
