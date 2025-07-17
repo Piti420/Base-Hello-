@@ -1,7 +1,7 @@
 // Konfiguracja adresów kontraktów
 const GM_CONTRACT = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
 const HI_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
-const WEBSITE_URL = "https://piti420.github.io/Base-Hello"; // Zaktualizowany URL
+const WEBSITE_URL = "https://piti420.github.io/Base-Hello";
 
 let provider;
 let signer;
@@ -24,7 +24,7 @@ const gmABI = [
   "event NewGM(address indexed greeter, string message)"
 ];
 
-// ABI kontraktu HI (zgodne z Basescan)
+// ABI kontraktu HI
 const hiABI = [
   "function claim() public",
   "function hasClaimed(address) public view returns (bool)",
@@ -34,6 +34,9 @@ const hiABI = [
 // Sprawdzenie sieci Base
 async function checkNetwork() {
   try {
+    if (!window.ethereum) {
+      throw new Error("MetaMask not detected");
+    }
     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
     const baseMainnetChainId = '0x2105'; // 8453 w hex
     if (chainId !== baseMainnetChainId) {
@@ -88,6 +91,8 @@ async function connectWallet() {
 // Sprawdzenie salda kontraktu HI
 async function checkContractBalance() {
   try {
+    if (!provider) throw new Error("Provider not initialized");
+    await checkNetwork();
     const contract = new ethers.Contract(HI_CONTRACT, hiABI, provider);
     const balance = await contract.balanceOf(HI_CONTRACT);
     const balanceInHI = ethers.utils.formatEther(balance);
@@ -95,6 +100,8 @@ async function checkContractBalance() {
       toastr.warning(`Contract balance is low (${balanceInHI} HI). Contact the owner to refill.`);
       document.getElementById("claimButton").disabled = true;
       document.getElementById("claimButton").style.opacity = 0.5;
+    } else {
+      toastr.info(`Contract balance: ${balanceInHI} HI`);
     }
   } catch (err) {
     console.error("Error checking contract balance:", err);
@@ -165,7 +172,6 @@ async function greetOnchain() {
     animateLogo();
     await updateGreetingInfo();
 
-    // Dynamiczne linki do udostępniania
     const shareText = encodeURIComponent(`I just said "${message}" on Base! 🚀 Join the community at ${WEBSITE_URL} #Base #Web3 #GM`);
     document.getElementById("shareTwitter").href = `https://twitter.com/intent/tweet?text=${shareText}`;
     document.getElementById("shareFarcaster").href = `https://warpcast.com/~/compose?text=${shareText}`;
@@ -183,6 +189,7 @@ async function sendGM() {
     await checkNetwork();
     const contract = new ethers.Contract(GM_CONTRACT, gmABI, signer);
     const message = "GM, Base!";
+    console.log("Sending GM transaction..."); // Debugowanie
     const tx = await contract.sayGM(message, { gasLimit: 150000 });
     toastr.info("Awaiting transaction confirmation...");
     await tx.wait();
@@ -192,7 +199,6 @@ async function sendGM() {
     animateLogo();
     await updateGreetingInfo();
 
-    // Dynamiczne linki do udostępniania
     const shareText = encodeURIComponent(`I just said "${message}" on Base! 🚀 Join the community at ${WEBSITE_URL} #Base #Web3 #GM`);
     document.getElementById("shareTwitter").href = `https://twitter.com/intent/tweet?text=${shareText}`;
     document.getElementById("shareFarcaster").href = `https://warpcast.com/~/compose?text=${shareText}`;
@@ -209,6 +215,7 @@ async function claimHI() {
 
     await checkNetwork();
     const contract = new ethers.Contract(HI_CONTRACT, hiABI, signer);
+    console.log("Checking hasClaimed for:", userAddress); // Debugowanie
     const hasClaimed = await contract.hasClaimed(userAddress);
     if (hasClaimed) {
       toastr.warning("This address has already claimed 100 HI tokens.");
@@ -217,16 +224,17 @@ async function claimHI() {
       return;
     }
 
-    // Sprawdź saldo kontraktu przed claimem
+    console.log("Checking contract balance..."); // Debugowanie
     const balance = await contract.balanceOf(HI_CONTRACT);
     const balanceInHI = ethers.utils.formatEther(balance);
     if (parseFloat(balanceInHI) < 100) {
-      toastr.error("Contract does not have enough HI tokens to claim.");
+      toastr.error(`Contract does not have enough HI tokens to claim (${balanceInHI} HI).`);
       document.getElementById("claimButton").disabled = true;
       document.getElementById("claimButton").style.opacity = 0.5;
       return;
     }
 
+    console.log("Sending claim transaction..."); // Debugowanie
     const tx = await contract.claim({ gasLimit: 200000 });
     toastr.info("Awaiting transaction confirmation...");
     await tx.wait();
@@ -255,14 +263,32 @@ function animateLogo() {
 
 // Inicjalizacja
 window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("connectWallet").addEventListener("click", connectWallet);
-  document.getElementById("greetButton").addEventListener("click", greetOnchain);
-  document.getElementById("gmButton").addEventListener("click", () => {
-    console.log("GM button clicked"); // Debugowanie
+  console.log("Initializing event listeners..."); // Debugowanie
+  const connectButton = document.getElementById("connectWallet");
+  const greetButton = document.getElementById("greetButton");
+  const gmButton = document.getElementById("gmButton");
+  const claimButton = document.getElementById("claimButton");
+
+  if (!connectButton || !greetButton || !gmButton || !claimButton) {
+    console.error("One or more buttons not found in DOM");
+    toastr.error("Error: Buttons not found. Check HTML.");
+    return;
+  }
+
+  connectButton.addEventListener("click", () => {
+    console.log("Connect Wallet clicked");
+    connectWallet();
+  });
+  greetButton.addEventListener("click", () => {
+    console.log("Greet Onchain clicked");
+    greetOnchain();
+  });
+  gmButton.addEventListener("click", () => {
+    console.log("GM button clicked");
     sendGM();
   });
-  document.getElementById("claimButton").addEventListener("click", () => {
-    console.log("Claim button clicked"); // Debugowanie
+  claimButton.addEventListener("click", () => {
+    console.log("Claim button clicked");
     claimHI();
   });
 });
