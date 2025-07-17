@@ -8,7 +8,11 @@ let userAddress;
 
 // ABI kontraktu GM
 const gmABI = [
-  "function gm() public returns (string memory)"
+  "function sayGM(string memory _message) public",
+  "function getGreeting() public view returns (string memory)",
+  "function getLastGreeter() public view returns (address)",
+  "function getGreetingCount() public view returns (uint256)",
+  "event NewGM(address indexed greeter, string message)"
 ];
 
 // ABI kontraktu HI (claim)
@@ -16,14 +20,52 @@ const hiABI = [
   "function claim() public"
 ];
 
+// Sprawdzenie sieci Base
+async function checkNetwork() {
+  const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+  const baseMainnetChainId = '0x2105'; // 8453 w hex
+  const baseSepoliaChainId = '0x14a34'; // 84532 w hex
+  if (chainId !== baseMainnetChainId && chainId !== baseSepoliaChainId) {
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: baseMainnetChainId }],
+      });
+    } catch (switchError) {
+      if (switchError.code === 4902) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: baseMainnetChainId,
+            chainName: 'Base Mainnet',
+            rpcUrls: ['https://mainnet.base.org'],
+            nativeCurrency: {
+              name: 'ETH',
+              symbol: 'ETH',
+              decimals: 18
+            },
+            blockExplorerUrls: ['https://basescan.org']
+          }],
+        });
+      }
+    }
+  }
+}
+
 // Połączenie z portfelem
 async function connectWallet() {
   if (window.ethereum) {
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = provider.getSigner();
-    userAddress = await signer.getAddress();
-    document.getElementById("wallet-address").innerText = `🟢 ${userAddress}`;
+    try {
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      userAddress = await signer.getAddress();
+      document.getElementById("status").innerText = `🟢 Connected: ${userAddress}`;
+      await checkNetwork();
+    } catch (err) {
+      console.error("Connect error:", err);
+      document.getElementById("status").innerText = "❌ Failed to connect wallet.";
+    }
   } else {
     alert("MetaMask not detected!");
   }
@@ -34,12 +76,20 @@ async function greetOnchain() {
   try {
     if (!signer) return alert("Connect your wallet first");
 
+    await checkNetwork();
     const contract = new ethers.Contract(GM_CONTRACT, gmABI, signer);
-    const tx = await contract.gm({ gasLimit: 150000 });
+    const message = "Hello from Base"; // Możesz dodać input w HTML, by użytkownik wpisał wiadomość
+    const tx = await contract.sayGM(message, { gasLimit: 150000 });
     await tx.wait();
 
     document.getElementById("status").innerText = "✅ Greeted onchain!";
+    document.getElementById("shareButtons").style.display = "block";
     animateLogo();
+
+    // Odczyt powitania
+    const greeting = await contract.getGreeting();
+    const count = await contract.getGreetingCount();
+    document.getElementById("gmCount").innerText = `Current Greeting: ${greeting} | Total Greetings: ${count}`;
   } catch (err) {
     console.error("Greet error:", err);
     document.getElementById("status").innerText = "❌ Failed to send GM. Check wallet or try again.";
@@ -51,6 +101,7 @@ async function claimHI() {
   try {
     if (!signer) return alert("Connect your wallet first");
 
+    await checkNetwork();
     const contract = new ethers.Contract(HI_CONTRACT, hiABI, signer);
     const tx = await contract.claim({ gasLimit: 150000 });
     await tx.wait();
@@ -65,7 +116,7 @@ async function claimHI() {
 
 // Animacja logo po sukcesie
 function animateLogo() {
-  const logo = document.getElementById("logo");
+  const logo = document.getElementById("helloLogo");
   if (!logo) return;
 
   logo.classList.add("pulse");
@@ -74,7 +125,7 @@ function animateLogo() {
 
 // Przypnij event listenery
 window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("connectButton")?.addEventListener("click", connectWallet);
-  document.getElementById("gmButton")?.addEventListener("click", greetOnchain);
-  document.getElementById("claimButton")?.addEventListener("click", claimHI);
+  document.getElementById("connectWallet").addEventListener("click", connectWallet);
+  document.getElementById("greetButton").addEventListener("click", greetOnchain);
+  document.getElementById("claimButton").addEventListener("click", claimHI);
 });
