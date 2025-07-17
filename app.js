@@ -54,15 +54,15 @@ async function connectWallet() {
       await provider.send("eth_requestAccounts", []);
       signer = provider.getSigner();
       userAddress = await signer.getAddress();
-      document.getElementById("status").innerText = `🟢 Connected: ${userAddress}`;
+      document.getElementById("status").innerText = `🟢 Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
       await checkNetwork();
       await updateGreetingInfo();
     } catch (err) {
       console.error("Connect error:", err);
-      document.getElementById("status").innerText = "❌ Failed to connect wallet.";
+      document.getElementById("status").innerText = "❌ Failed to connect wallet. Try again.";
     }
   } else {
-    alert("MetaMask not detected!");
+    alert("MetaMask not detected! Please install it.");
   }
 }
 
@@ -73,9 +73,10 @@ async function updateGreetingInfo() {
     const greeting = await contract.getGreeting();
     const count = await contract.getGreetingCount();
     const lastGreeter = await contract.getLastGreeter();
-    document.getElementById("gmCount").innerText = `Current Greeting: ${greeting} | Total Greetings: ${count} | Last Greeter: ${lastGreeter}`;
+    document.getElementById("gmCount").innerText = `Latest Greeting: "${greeting}" | Total Greetings: ${count} | Last Greeter: ${lastGreeter.slice(0, 6)}...${lastGreeter.slice(-4)}`;
   } catch (err) {
     console.error("Error fetching greeting info:", err);
+    document.getElementById("gmCount").innerText = "⚠️ Unable to fetch greeting data.";
   }
 }
 
@@ -91,13 +92,13 @@ async function greetOnchain() {
     const tx = await contract.sayGM(message, { gasLimit: 150000 });
     await tx.wait();
 
-    document.getElementById("status").innerText = "✅ Greeted onchain!";
+    document.getElementById("status").innerText = "✅ Greeted onchain! Your message is live!";
     document.getElementById("shareButtons").style.display = "block";
     animateLogo();
     await updateGreetingInfo();
 
     // Dynamiczne linki do udostępniania
-    const shareText = encodeURIComponent(`I just said "${message}" on Base! 🚀 Join the community at ${WEBSITE_URL} #Base #Web3`);
+    const shareText = encodeURIComponent(`I just said "${message}" on Base! 🚀 Join the community at ${WEBSITE_URL} #Base #Web3 #GM`);
     document.getElementById("shareTwitter").href = `https://twitter.com/intent/tweet?text=${shareText}`;
     document.getElementById("shareFarcaster").href = `https://warpcast.com/~/compose?text=${shareText}`;
   } catch (err) {
@@ -116,11 +117,11 @@ async function claimHI() {
     const tx = await contract.claim({ gasLimit: 150000 });
     await tx.wait();
 
-    document.getElementById("status").innerText = "✅ Claimed 100 HI!";
+    document.getElementById("status").innerText = "✅ Claimed 100 HI! Check your wallet!";
     animateLogo();
   } catch (err) {
     console.error("Claim error:", err);
-    document.getElementById("status").innerText = "❌ Failed to claim HI.";
+    document.getElementById("status").innerText = "❌ Failed to claim HI. Try again.";
   }
 }
 
