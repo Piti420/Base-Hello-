@@ -1,7 +1,9 @@
 // Konfiguracja adresów kontraktów
 const GM_CONTRACT = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
 const HI_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
-const WEBSITE_URL = "https://yourusername.github.io/your-repo"; // Zastąp swoim URL-em GitHub Pages
+const WEBSITE_URL = "https://piti420.github.io/Base-Hello-/";
+
+"; // Zastąp swoim URL-em GitHub Pages
 
 let provider;
 let signer;
