@@ -1,7 +1,7 @@
 // Konfiguracja adresów kontraktów
 const GM_CONTRACT = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
 const HI_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
-const WEBSITE_URL = "https://piti420.github.io/Base-Hello"; 
+const WEBSITE_URL = "https://yourusername.github.io/your-repo"; // Zastąp swoim URL-em GitHub Pages
 
 let provider;
 let signer;
@@ -41,6 +41,7 @@ async function checkNetwork() {
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: baseMainnetChainId }],
       });
+      toastr.info("Switched to Base Mainnet");
     }
   } catch (switchError) {
     if (switchError.code === 4902) {
@@ -54,7 +55,9 @@ async function checkNetwork() {
           blockExplorerUrls: ['https://basescan.org']
         }],
       });
+      toastr.info("Added Base Mainnet to MetaMask");
     } else {
+      toastr.error(`Failed to switch network: ${switchError.message}`);
       throw switchError;
     }
   }
@@ -67,7 +70,7 @@ async function connectWallet() {
     return;
   }
   try {
-    provider = new ethers.providers.Web3Provider(window.ethereum);
+    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
     await provider.send("eth_requestAccounts", []);
     signer = provider.getSigner();
     userAddress = await signer.getAddress();
@@ -88,6 +91,7 @@ async function updateGreetingInfo() {
     return;
   }
   try {
+    await checkNetwork();
     const contract = new ethers.Contract(GM_CONTRACT, gmABI, provider);
     const greeting = await contract.getGreeting();
     const count = await contract.getGreetingCount();
@@ -95,14 +99,18 @@ async function updateGreetingInfo() {
     toastr.info(`Latest Greeting: "${greeting}" | Total Greetings: ${count} | Last Greeter: ${lastGreeter.slice(0, 6)}...${lastGreeter.slice(-4)}`);
   } catch (err) {
     console.error("Error fetching greeting info:", err);
-    // Nie pokazujemy błędu użytkownikowi, aby uniknąć "Unable to fetch"
+    // Nie pokazuj błędu użytkownikowi
   }
 }
 
 // Sprawdzenie statusu claimu
 async function checkClaimStatus() {
-  if (!userAddress || !provider) return;
+  if (!userAddress || !provider) {
+    console.warn("User address or provider not initialized, skipping checkClaimStatus");
+    return;
+  }
   try {
+    await checkNetwork();
     const contract = new ethers.Contract(HI_CONTRACT, hiABI, provider);
     const hasClaimed = await contract.hasClaimed(userAddress);
     if (hasClaimed) {
@@ -115,6 +123,9 @@ async function checkClaimStatus() {
     }
   } catch (err) {
     console.error("Error checking claim status:", err);
+    toastr.error(`Failed to check claim status: ${err.message}`);
+    document.getElementById("claimButton").disabled = true;
+    document.getElementById("claimButton").style.opacity = 0.5;
   }
 }
 
@@ -218,5 +229,5 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("greetButton").addEventListener("click", greetOnchain);
   document.getElementById("gmButton").addEventListener("click", sendGM);
   document.getElementById("claimButton").addEventListener("click", claimHI);
-  // Nie wywołujemy updateGreetingInfo przy ładowaniu, aby uniknąć błędu
+  // Nie wywołujemy updateGreetingInfo przy ładowaniu, aby uniknąć błędów
 });
