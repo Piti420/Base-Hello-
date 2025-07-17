@@ -1,7 +1,7 @@
 // Konfiguracja adresów kontraktów
 const GM_CONTRACT = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
 const HI_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
-const WEBSITE_URL = "https://yourusername.github.io/your-repo"; // Zastąp swoim URL-em GitHub Pages
+const WEBSITE_URL = "https://piti420.github.io/Base-Hello"; // Zaktualizowany URL
 
 let provider;
 let signer;
@@ -76,11 +76,29 @@ async function connectWallet() {
     userAddress = await signer.getAddress();
     toastr.success(`Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`);
     await checkNetwork();
+    await checkContractBalance();
     await checkClaimStatus();
     await updateGreetingInfo();
   } catch (err) {
     console.error("Connect error:", err);
     toastr.error(`Failed to connect wallet: ${err.message}`);
+  }
+}
+
+// Sprawdzenie salda kontraktu HI
+async function checkContractBalance() {
+  try {
+    const contract = new ethers.Contract(HI_CONTRACT, hiABI, provider);
+    const balance = await contract.balanceOf(HI_CONTRACT);
+    const balanceInHI = ethers.utils.formatEther(balance);
+    if (parseFloat(balanceInHI) < 100) {
+      toastr.warning(`Contract balance is low (${balanceInHI} HI). Contact the owner to refill.`);
+      document.getElementById("claimButton").disabled = true;
+      document.getElementById("claimButton").style.opacity = 0.5;
+    }
+  } catch (err) {
+    console.error("Error checking contract balance:", err);
+    toastr.error(`Failed to check contract balance: ${err.message}`);
   }
 }
 
@@ -199,6 +217,16 @@ async function claimHI() {
       return;
     }
 
+    // Sprawdź saldo kontraktu przed claimem
+    const balance = await contract.balanceOf(HI_CONTRACT);
+    const balanceInHI = ethers.utils.formatEther(balance);
+    if (parseFloat(balanceInHI) < 100) {
+      toastr.error("Contract does not have enough HI tokens to claim.");
+      document.getElementById("claimButton").disabled = true;
+      document.getElementById("claimButton").style.opacity = 0.5;
+      return;
+    }
+
     const tx = await contract.claim({ gasLimit: 200000 });
     toastr.info("Awaiting transaction confirmation...");
     await tx.wait();
@@ -211,6 +239,8 @@ async function claimHI() {
   } catch (err) {
     console.error("Claim error:", err);
     toastr.error(`Failed to claim HI: ${err.message}`);
+    document.getElementById("claimButton").disabled = true;
+    document.getElementById("claimButton").style.opacity = 0.5;
   }
 }
 
@@ -227,7 +257,12 @@ function animateLogo() {
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("connectWallet").addEventListener("click", connectWallet);
   document.getElementById("greetButton").addEventListener("click", greetOnchain);
-  document.getElementById("gmButton").addEventListener("click", sendGM);
-  document.getElementById("claimButton").addEventListener("click", claimHI);
-  // Nie wywołujemy updateGreetingInfo przy ładowaniu, aby uniknąć błędów
+  document.getElementById("gmButton").addEventListener("click", () => {
+    console.log("GM button clicked"); // Debugowanie
+    sendGM();
+  });
+  document.getElementById("claimButton").addEventListener("click", () => {
+    console.log("Claim button clicked"); // Debugowanie
+    claimHI();
+  });
 });
