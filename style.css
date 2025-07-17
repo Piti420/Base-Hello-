@@ -15,7 +15,7 @@ body {
   transition: transform 0.5s ease;
 }
 
-.logo.animate {
+.logo.pulse {
   transform: scale(1.3);
 }
 
