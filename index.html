@@ -3,18 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Say GM on Base with Hello Base World! Join the blockchain community." />
+  <meta name="keywords" content="Base, blockchain, Web3, Ethereum L2, community" />
   <title>Hello Base World</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 </head>
 <body>
+  <div id="particles-js"></div>
   <div class="container">
     <img src="hello.png" alt="Base Logo" class="logo" id="helloLogo" />
     <h1 class="title">Hello Base World</h1>
-    <p class="subtitle">Join the Base community and say GM onchain!</p>
+    <p class="subtitle">Say GM onchain and join the Base community! 🚀</p>
 
     <div class="input-section">
-      <input type="text" id="greetingInput" placeholder="Enter your GM message" />
+      <input type="text" id="greetingInput" placeholder="Enter your GM message (e.g., Hello Base!)" />
     </div>
 
     <div class="buttons">
@@ -27,16 +31,35 @@
     <div id="gmCount"></div>
 
     <div id="shareButtons" style="display: none">
-      <p>✅ Greeted successfully! Share it:</p>
+      <p>✅ Greeted successfully! Share it with the Base community:</p>
       <a href="#" target="_blank" id="shareTwitter">Share on X</a> |
       <a href="#" target="_blank" id="shareFarcaster">Share on Farcaster</a>
     </div>
 
     <footer>
-      <p class="built">🚀 Built on Base | <a href="https://base.org" target="_blank">Explore Base</a></p>
+      <p class="built">🚀 Built on Base | <a href="https://base.org" target="_blank">Explore Base</a> | <a href="https://basescan.org/address/0x06B17752e177681e5Df80e0996228D7d1dB2F61b" target="_blank">View Contract</a></p>
     </footer>
   </div>
 
   <script src="app.js"></script>
+  <script>
+    particlesJS("particles-js", {
+      particles: {
+        number: { value: 80, density: { enable: true, value_area: 800 } },
+        color: { value: "#00D4FF" },
+        shape: { type: "circle" },
+        opacity: { value: 0.5, random: true },
+        size: { value: 3, random: true },
+        line_linked: { enable: true, distance: 150, color: "#4D99FF", opacity: 0.4, width: 1 },
+        move: { enable: true, speed: 2, direction: "none", random: false }
+      },
+      interactivity: {
+        detect_on: "canvas",
+        events: { onhover: { enable: true, mode: "repulse" }, onclick: { enable: true, mode: "push" } },
+        modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
+      },
+      retina_detect: true
+    });
+  </script>
 </body>
 </html>
