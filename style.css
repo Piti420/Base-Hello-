@@ -187,4 +187,8 @@ footer a:hover {
 /* Responsywność */
 @media (max-width: 600px) {
   .title { font-size: 2.5rem; }
-  .logo { width
+  .logo { width: 120px; }
+  #greetingInput { width: 90%; }
+  .buttons { flex-direction: column; }
+  #gmButton { width: 60px; height: 60px; font-size: 1rem; }
+}
