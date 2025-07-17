@@ -7,6 +7,14 @@ let provider;
 let signer;
 let userAddress;
 
+// Konfiguracja toastr
+toastr.options = {
+  positionClass: "toast-top-right",
+  timeOut: 5000,
+  closeButton: true,
+  progressBar: true
+};
+
 // ABI kontraktu GM
 const gmABI = [
   "function sayGM(string memory _message) public",
@@ -16,7 +24,7 @@ const gmABI = [
   "event NewGM(address indexed greeter, string message)"
 ];
 
-// ABI kontraktu HI (zakładam, że ma funkcję claim i hasClaimed)
+// ABI kontraktu HI (zgodne z Basescan)
 const hiABI = [
   "function claim() public",
   "function hasClaimed(address) public view returns (bool)",
@@ -55,7 +63,7 @@ async function checkNetwork() {
 // Połączenie z portfelem
 async function connectWallet() {
   if (!window.ethereum) {
-    alert("MetaMask not detected! Please install it.");
+    toastr.error("MetaMask not detected! Please install it.");
     return;
   }
   try {
@@ -63,37 +71,42 @@ async function connectWallet() {
     await provider.send("eth_requestAccounts", []);
     signer = provider.getSigner();
     userAddress = await signer.getAddress();
-    document.getElementById("status").innerText = `🟢 Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+    toastr.success(`Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`);
     await checkNetwork();
-    await updateGreetingInfo();
     await checkClaimStatus();
+    await updateGreetingInfo();
   } catch (err) {
     console.error("Connect error:", err);
-    document.getElementById("status").innerText = "❌ Failed to connect wallet. Try again.";
+    toastr.error(`Failed to connect wallet: ${err.message}`);
   }
 }
 
 // Aktualizacja informacji o powitaniach
 async function updateGreetingInfo() {
+  if (!provider) {
+    console.warn("Provider not initialized, skipping updateGreetingInfo");
+    return;
+  }
   try {
     const contract = new ethers.Contract(GM_CONTRACT, gmABI, provider);
     const greeting = await contract.getGreeting();
     const count = await contract.getGreetingCount();
     const lastGreeter = await contract.getLastGreeter();
-    document.getElementById("gmCount").innerText = `Latest Greeting: "${greeting}" | Total Greetings: ${count} | Last Greeter: ${lastGreeter.slice(0, 6)}...${lastGreeter.slice(-4)}`;
+    toastr.info(`Latest Greeting: "${greeting}" | Total Greetings: ${count} | Last Greeter: ${lastGreeter.slice(0, 6)}...${lastGreeter.slice(-4)}`);
   } catch (err) {
     console.error("Error fetching greeting info:", err);
-    document.getElementById("gmCount").innerText = "⚠️ Unable to fetch greeting data.";
+    // Nie pokazujemy błędu użytkownikowi, aby uniknąć "Unable to fetch"
   }
 }
 
 // Sprawdzenie statusu claimu
 async function checkClaimStatus() {
+  if (!userAddress || !provider) return;
   try {
     const contract = new ethers.Contract(HI_CONTRACT, hiABI, provider);
     const hasClaimed = await contract.hasClaimed(userAddress);
     if (hasClaimed) {
-      document.getElementById("status").innerText = "⚠️ This address has already claimed 100 HI tokens.";
+      toastr.warning("This address has already claimed 100 HI tokens.");
       document.getElementById("claimButton").disabled = true;
       document.getElementById("claimButton").style.opacity = 0.5;
     } else {
@@ -101,23 +114,24 @@ async function checkClaimStatus() {
       document.getElementById("claimButton").style.opacity = 1;
     }
   } catch (err) {
-    console.error("Error checking claim status:", NYC);
+    console.error("Error checking claim status:", err);
   }
 }
 
 // Greet Onchain (z inputu)
 async function greetOnchain() {
   try {
-    if (!signer) return alert("Connect your wallet first");
+    if (!signer) return toastr.error("Connect your wallet first");
 
     await checkNetwork();
     const contract = new ethers.Contract(GM_CONTRACT, gmABI, signer);
     const message = document.getElementById("greetingInput").value;
-    if (!message) return alert("Please enter a greeting message");
+    if (!message) return toastr.error("Please enter a greeting message");
     const tx = await contract.sayGM(message, { gasLimit: 150000 });
+    toastr.info("Awaiting transaction confirmation...");
     await tx.wait();
 
-    document.getElementById("status").innerText = "✅ Greeted onchain! Your message is live!";
+    toastr.success("Greeted onchain! Your message is live!");
     document.getElementById("shareButtons").style.display = "block";
     animateLogo();
     await updateGreetingInfo();
@@ -128,22 +142,23 @@ async function greetOnchain() {
     document.getElementById("shareFarcaster").href = `https://warpcast.com/~/compose?text=${shareText}`;
   } catch (err) {
     console.error("Greet error:", err);
-    document.getElementById("status").innerText = `❌ Failed to send GM: ${err.message}`;
+    toastr.error(`Failed to send GM: ${err.message}`);
   }
 }
 
 // GM (domyślne powitanie)
 async function sendGM() {
   try {
-    if (!signer) return alert("Connect your wallet first");
+    if (!signer) return toastr.error("Connect your wallet first");
 
     await checkNetwork();
     const contract = new ethers.Contract(GM_CONTRACT, gmABI, signer);
     const message = "GM, Base!";
     const tx = await contract.sayGM(message, { gasLimit: 150000 });
+    toastr.info("Awaiting transaction confirmation...");
     await tx.wait();
 
-    document.getElementById("status").innerText = "✅ GM sent onchain! Your message is live!";
+    toastr.success("GM sent onchain! Your message is live!");
     document.getElementById("shareButtons").style.display = "block";
     animateLogo();
     await updateGreetingInfo();
@@ -154,33 +169,37 @@ async function sendGM() {
     document.getElementById("shareFarcaster").href = `https://warpcast.com/~/compose?text=${shareText}`;
   } catch (err) {
     console.error("GM error:", err);
-    document.getElementById("status").innerText = `❌ Failed to send GM: ${err.message}`;
+    toastr.error(`Failed to send GM: ${err.message}`);
   }
 }
 
 // Claim 100 HI
 async function claimHI() {
   try {
-    if (!signer) return alert("Connect your wallet first");
+    if (!signer) return toastr.error("Connect your wallet first");
 
     await checkNetwork();
     const contract = new ethers.Contract(HI_CONTRACT, hiABI, signer);
     const hasClaimed = await contract.hasClaimed(userAddress);
     if (hasClaimed) {
-      document.getElementById("status").innerText = "⚠️ This address has already claimed 100 HI tokens.";
+      toastr.warning("This address has already claimed 100 HI tokens.");
+      document.getElementById("claimButton").disabled = true;
+      document.getElementById("claimButton").style.opacity = 0.5;
       return;
     }
 
     const tx = await contract.claim({ gasLimit: 200000 });
+    toastr.info("Awaiting transaction confirmation...");
     await tx.wait();
 
-    document.getElementById("status").innerText = "✅ Claimed 100 HI! Check your wallet!";
+    toastr.success("Claimed 100 HI! Check your wallet!");
     document.getElementById("claimButton").disabled = true;
     document.getElementById("claimButton").style.opacity = 0.5;
     animateLogo();
+    await checkClaimStatus();
   } catch (err) {
     console.error("Claim error:", err);
-    document.getElementById("status").innerText = `❌ Failed to claim HI: ${err.message}`;
+    toastr.error(`Failed to claim HI: ${err.message}`);
   }
 }
 
@@ -199,5 +218,5 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("greetButton").addEventListener("click", greetOnchain);
   document.getElementById("gmButton").addEventListener("click", sendGM);
   document.getElementById("claimButton").addEventListener("click", claimHI);
-  updateGreetingInfo();
+  // Nie wywołujemy updateGreetingInfo przy ładowaniu, aby uniknąć błędu
 });
