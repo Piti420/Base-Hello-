@@ -9,8 +9,13 @@
 </head>
 <body>
   <div class="container">
-    <img src="hello.png" alt="Hello Logo" class="logo" id="helloLogo" />
+    <img src="hello.png" alt="Base Logo" class="logo" id="helloLogo" />
     <h1 class="title">Hello Base World</h1>
+    <p class="subtitle">Join the Base community and say GM onchain!</p>
+
+    <div class="input-section">
+      <input type="text" id="greetingInput" placeholder="Enter your GM message" />
+    </div>
 
     <div class="buttons">
       <button id="connectWallet">Connect Wallet</button>
@@ -23,12 +28,12 @@
 
     <div id="shareButtons" style="display: none">
       <p>✅ Greeted successfully! Share it:</p>
-      <a href="#" target="_blank" id="shareTwitter">Share on Twitter</a> |
-      <a href="https://warpcast.com/~/compose?text=gm%20from%20Hello%20Base%20on%20Base!%20%F0%9F%9A%80" target="_blank">Share on Farcaster</a>
+      <a href="#" target="_blank" id="shareTwitter">Share on X</a> |
+      <a href="#" target="_blank" id="shareFarcaster">Share on Farcaster</a>
     </div>
 
     <footer>
-      <p class="built">🚀 Built on Base</p>
+      <p class="built">🚀 Built on Base | <a href="https://base.org" target="_blank">Explore Base</a></p>
     </footer>
   </div>
 
