@@ -7,10 +7,10 @@
   <meta name="keywords" content="Base, blockchain, Web3, Ethereum L2, community" />
   <title>Hello Base World</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
 </head>
 <body>
   <div id="particles-js"></div>
@@ -45,6 +45,21 @@
 
   <script src="app.js"></script>
   <script>
+    // Inicjalizacja toastr po załadowaniu DOM
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof toastr === 'undefined') {
+        console.error("toastr not loaded");
+        alert("Error: toastr.js failed to load. Please check your internet connection or CDN.");
+      } else {
+        toastr.options = {
+          positionClass: "toast-top-right",
+          timeOut: 5000,
+          closeButton: true,
+          progressBar: true
+        };
+      }
+    });
+
     particlesJS("particles-js", {
       particles: {
         number: { value: 80, density: { enable: true, value_area: 800 } },
