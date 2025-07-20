@@ -1,6 +1,5 @@
 // Konfiguracja adresów kontraktów
 const GM_CONTRACT = "0x06B17752e177681e5Df80e0996228D7d1dB2F61b";
-const HI_CONTRACT = "0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0";
 const WEBSITE_URL = "https://piti420.github.io/Base-Hello";
 
 let provider;
@@ -14,13 +13,6 @@ const gmABI = [
   "function getLastGreeter() public view returns (address)",
   "function getGreetingCount() public view returns (uint256)",
   "event NewGM(address indexed greeter, string message)"
-];
-
-// ABI kontraktu HI
-const hiABI = [
-  "function claim() public",
-  "function hasClaimed(address) public view returns (bool)",
-  "function balanceOf(address) public view returns (uint256)"
 ];
 
 // Sprawdzenie sieci Base
@@ -76,34 +68,10 @@ async function connectWallet() {
     userAddress = await signer.getAddress();
     toastr.success(`Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`);
     await checkNetwork();
-    await checkContractBalance();
-    await checkClaimStatus();
     await updateGreetingInfo();
   } catch (err) {
     console.error("Connect error:", err);
     toastr.error(`Failed to connect wallet: ${err.message}`);
-  }
-}
-
-// Sprawdzenie salda kontraktu HI
-async function checkContractBalance() {
-  try {
-    if (!provider) throw new Error("Provider not initialized");
-    await checkNetwork();
-    const contract = new ethers.Contract(HI_CONTRACT, hiABI, provider);
-    const balance = await contract.balanceOf(HI_CONTRACT);
-    const balanceInHI = ethers.utils.formatEther(balance);
-    console.log(`Contract balance: ${balanceInHI} HI`);
-    if (parseFloat(balanceInHI) < 100) {
-      toastr.warning(`Contract balance is low (${balanceInHI} HI). Contact the owner to refill.`);
-      document.getElementById("claimButton").disabled = true;
-      document.getElementById("claimButton").style.opacity = 0.5;
-    } else {
-      toastr.info(`Contract balance: ${balanceInHI} HI`);
-    }
-  } catch (err) {
-    console.error("Error checking contract balance:", err);
-    toastr.error(`Failed to check contract balance: ${err.message}`);
   }
 }
 
@@ -123,37 +91,6 @@ async function updateGreetingInfo() {
   } catch (err) {
     console.error("Error fetching greeting info:", err);
     // Nie pokazuj błędu użytkownikowi
-  }
-}
-
-// Sprawdzenie statusu claimu
-async function checkClaimStatus() {
-  if (!userAddress || !provider) {
-    console.warn("User address or provider not initialized, skipping checkClaimStatus");
-    return;
-  }
-  try {
-    await checkNetwork();
-    const contract = new ethers.Contract(HI_CONTRACT, hiABI, provider);
-    console.log("Checking hasClaimed for:", userAddress);
-    const hasClaimed = await contract.hasClaimed(userAddress);
-    if (hasClaimed) {
-      toastr.warning("This address has already claimed 100 HI tokens.");
-      document.getElementById("claimButton").disabled = true;
-      document.getElementById("claimButton").style.opacity = 0.5;
-    } else {
-      document.getElementById("claimButton").disabled = false;
-      document.getElementById("claimButton").style.opacity = 1;
-    }
-  } catch (err) {
-    console.error("Error checking claim status:", err);
-    if (err.code === "CALL_EXCEPTION") {
-      toastr.error(`Failed to check claim status: Ensure you're on Base Mainnet (Chain ID: 8453) and the contract is valid. Error: ${err.message}`);
-    } else {
-      toastr.error(`Failed to check claim status: ${err.message}`);
-    }
-    document.getElementById("claimButton").disabled = true;
-    document.getElementById("claimButton").style.opacity = 0.5;
   }
 }
 
@@ -212,57 +149,6 @@ async function sendGM() {
   }
 }
 
-// Claim 100 HI
-async function claimHI() {
-  try {
-    if (!signer) return toastr.error("Connect your wallet first");
-
-    await checkNetwork();
-    const contract = new ethers.Contract(HI_CONTRACT, hiABI, signer);
-    console.log("Checking hasClaimed for:", userAddress);
-    const hasClaimed = await contract.hasClaimed(userAddress);
-    if (hasClaimed) {
-      toastr.warning("This address has already claimed 100 HI tokens.");
-      document.getElementById("claimButton").disabled = true;
-      document.getElementById("claimButton").style.opacity = 0.5;
-      return;
-    }
-
-    console.log("Checking contract balance...");
-    const balance = await contract.balanceOf(HI_CONTRACT);
-    const balanceInHI = ethers.utils.formatEther(balance);
-    console.log(`Contract balance: ${balanceInHI} HI`);
-    if (parseFloat(balanceInHI) < 100) {
-      toastr.error(`Contract does not have enough HI tokens to claim (${balanceInHI} HI). Contact the owner to refill.`);
-      document.getElementById("claimButton").disabled = true;
-      document.getElementById("claimButton").style.opacity = 0.5;
-      return;
-    }
-
-    console.log("Sending claim transaction...");
-    const tx = await contract.claim({ gasLimit: 300000 });
-    toastr.info("Awaiting transaction confirmation...");
-    await tx.wait();
-
-    toastr.success("Claimed 100 HI! Check your wallet!");
-    document.getElementById("claimButton").disabled = true;
-    document.getElementById("claimButton").style.opacity = 0.5;
-    animateLogo();
-    await checkClaimStatus();
-  } catch (err) {
-    console.error("Claim error:", err);
-    if (err.code === "CALL_EXCEPTION") {
-      toastr.error(`Failed to claim HI: Contract call failed. Ensure you're on Base Mainnet (Chain ID: 8453) and the contract is valid. Error: ${err.message}`);
-    } else if (err.code === -32603) {
-      toastr.error(`Failed to claim HI: Transaction failed, possibly due to insufficient contract balance or gas.`);
-    } else {
-      toastr.error(`Failed to claim HI: ${err.message}`);
-    }
-    document.getElementById("claimButton").disabled = true;
-    document.getElementById("claimButton").style.opacity = 0.5;
-  }
-}
-
 // Animacja logo
 function animateLogo() {
   const logo = document.getElementById("helloLogo");
@@ -278,9 +164,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const connectButton = document.getElementById("connectWallet");
   const greetButton = document.getElementById("greetButton");
   const gmButton = document.getElementById("gmButton");
-  const claimButton = document.getElementById("claimButton");
 
-  if (!connectButton || !greetButton || !gmButton || !claimButton) {
+  if (!connectButton || !greetButton || !gmButton) {
     console.error("One or more buttons not found in DOM");
     toastr.error("Error: Buttons not found. Check HTML.");
     return;
@@ -297,9 +182,5 @@ window.addEventListener("DOMContentLoaded", () => {
   gmButton.addEventListener("click", () => {
     console.log("GM button clicked");
     sendGM();
-  });
-  claimButton.addEventListener("click", () => {
-    console.log("Claim button clicked");
-    claimHI();
   });
 });
