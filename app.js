@@ -148,7 +148,7 @@ async function checkClaimStatus() {
   } catch (err) {
     console.error("Error checking claim status:", err);
     if (err.code === "CALL_EXCEPTION") {
-      toastr.error(`Failed to check claim status: Ensure you're on Base Mainnet (Chain ID: 8453) and the contract is valid.`);
+      toastr.error(`Failed to check claim status: Ensure you're on Base Mainnet (Chain ID: 8453) and the contract is valid. Error: ${err.message}`);
     } else {
       toastr.error(`Failed to check claim status: ${err.message}`);
     }
@@ -231,6 +231,7 @@ async function claimHI() {
     console.log("Checking contract balance...");
     const balance = await contract.balanceOf(HI_CONTRACT);
     const balanceInHI = ethers.utils.formatEther(balance);
+    console.log(`Contract balance: ${balanceInHI} HI`);
     if (parseFloat(balanceInHI) < 100) {
       toastr.error(`Contract does not have enough HI tokens to claim (${balanceInHI} HI). Contact the owner to refill.`);
       document.getElementById("claimButton").disabled = true;
@@ -251,7 +252,7 @@ async function claimHI() {
   } catch (err) {
     console.error("Claim error:", err);
     if (err.code === "CALL_EXCEPTION") {
-      toastr.error(`Failed to claim HI: Contract call failed. Ensure you're on Base Mainnet (Chain ID: 8453) and the contract has enough tokens.`);
+      toastr.error(`Failed to claim HI: Contract call failed. Ensure you're on Base Mainnet (Chain ID: 8453) and the contract is valid. Error: ${err.message}`);
     } else if (err.code === -32603) {
       toastr.error(`Failed to claim HI: Transaction failed, possibly due to insufficient contract balance or gas.`);
     } else {
