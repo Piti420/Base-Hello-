@@ -48,8 +48,13 @@
     // Inicjalizacja toastr po załadowaniu DOM
     document.addEventListener("DOMContentLoaded", () => {
       if (typeof toastr === 'undefined') {
-        console.error("toastr not loaded");
-        alert("Error: toastr.js failed to load. Please check your internet connection or CDN.");
+        console.error("toastr not loaded, falling back to alert");
+        window.toastr = {
+          info: msg => { console.log("Info: " + msg); alert("Info: " + msg); },
+          success: msg => { console.log("Success: " + msg); alert("Success: " + msg); },
+          warning: msg => { console.log("Warning: " + msg); alert("Warning: " + msg); },
+          error: msg => { console.log("Error: " + msg); alert("Error: " + msg); }
+        };
       } else {
         toastr.options = {
           positionClass: "toast-top-right",
@@ -58,24 +63,24 @@
           progressBar: true
         };
       }
-    });
 
-    particlesJS("particles-js", {
-      particles: {
-        number: { value: 80, density: { enable: true, value_area: 800 } },
-        color: { value: "#00D4FF" },
-        shape: { type: "circle" },
-        opacity: { value: 0.5, random: true },
-        size: { value: 3, random: true },
-        line_linked: { enable: true, distance: 150, color: "#4D99FF", opacity: 0.4, width: 1 },
-        move: { enable: true, speed: 2, direction: "none", random: false }
-      },
-      interactivity: {
-        detect_on: "canvas",
-        events: { onhover: { enable: true, mode: "repulse" }, onclick: { enable: true, mode: "push" } },
-        modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
-      },
-      retina_detect: true
+      particlesJS("particles-js", {
+        particles: {
+          number: { value: 80, density: { enable: true, value_area: 800 } },
+          color: { value: "#00D4FF" },
+          shape: { type: "circle" },
+          opacity: { value: 0.5, random: true },
+          size: { value: 3, random: true },
+          line_linked: { enable: true, distance: 150, color: "#4D99FF", opacity: 0.4, width: 1 },
+          move: { enable: true, speed: 2, direction: "none", random: false }
+        },
+        interactivity: {
+          detect_on: "canvas",
+          events: { onhover: { enable: true, mode: "repulse" }, onclick: { enable: true, mode: "push" } },
+          modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
+        },
+        retina_detect: true
+      });
     });
   </script>
 </body>
