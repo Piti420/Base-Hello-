@@ -26,7 +26,6 @@
     <div class="buttons">
       <button id="connectWallet">Connect Wallet</button>
       <button id="greetButton">Greet Onchain</button>
-      <button id="claimButton">Claim 100 HI</button>
     </div>
     <div class="gm-button">
       <button id="gmButton">GM</button>
@@ -39,7 +38,7 @@
     </div>
 
     <footer>
-      <p class="built">🚀 Built on Base | <a href="https://base.org" target="_blank">Explore Base</a> | <a href="https://basescan.org/address/0x06B17752e177681e5Df80e0996228D7d1dB2F61b" target="_blank">View GM Contract</a> | <a href="https://basescan.org/address/0xdEeBc11cB7eDAe91aD9a6165ab385B6D04a839E0" target="_blank">View HI Contract</a></p>
+      <p class="built">🚀 Built on Base | <a href="https://base.org" target="_blank">Explore Base</a> | <a href="https://basescan.org/address/0x06B17752e177681e5Df80e0996228D7d1dB2F61b" target="_blank">View GM Contract</a></p>
     </footer>
   </div>
 
@@ -48,7 +47,7 @@
     // Inicjalizacja toastr po załadowaniu DOM
     document.addEventListener("DOMContentLoaded", () => {
       if (typeof toastr === 'undefined') {
-        console.error("toastr not loaded, falling back to alert");
+        console.warn("toastr.js not loaded, using alert fallback");
         window.toastr = {
           info: msg => { console.log("Info: " + msg); alert("Info: " + msg); },
           success: msg => { console.log("Success: " + msg); alert("Success: " + msg); },
@@ -62,6 +61,7 @@
           closeButton: true,
           progressBar: true
         };
+        console.log("toastr.js loaded successfully");
       }
 
       particlesJS("particles-js", {
